@@ -3,6 +3,7 @@ import os
 from .schema.models import db
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
+from .routes.recommendations import recommender
 
 load_dotenv()
 
@@ -15,6 +16,7 @@ def create_app(test_config=None):
             SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL'),
             JWT_SECRET_KEY=os.getenv('JWT_SECRET_KEY'),
             SQLALCHEMY_TRACK_MODIFICATIONS=False
+            
         )
     else:
         app.config.from_mapping(test_config)
@@ -27,6 +29,8 @@ def create_app(test_config=None):
     JWTManager(app)
 
     # configure blueprints here
+    app.register_blueprint(recommender)
+    
 
     # exception handling
     # @app.errorhandler(HTTP_404_NOT_FOUND)
