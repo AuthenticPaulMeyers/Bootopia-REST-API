@@ -41,6 +41,7 @@ class Book(db.Model):
     cover_image_url = db.Column(db.Text)
     year_published = db.Column(db.Integer)
     isbn = db.Column(db.String(255))
+    
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     user_books = db.relationship('UserBook', backref='book', lazy=True)
     posts = db.relationship('Post', backref='book', lazy=True)

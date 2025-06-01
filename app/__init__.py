@@ -4,6 +4,7 @@ from .schema.models import db
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 from .routes.recommendations import recommender
+from .routes.book import books
 
 load_dotenv()
 
@@ -30,6 +31,7 @@ def create_app(test_config=None):
 
     # configure blueprints here
     app.register_blueprint(recommender)
+    app.register_blueprint(books)
     
 
     # exception handling

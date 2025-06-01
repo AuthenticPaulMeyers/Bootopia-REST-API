@@ -10,7 +10,6 @@ client = OpenAI(
         api_key=os.getenv("GITHUB_TOKEN"),
 )
 
-
 def get_mood_recommendations(mood):
         
         response = client.chat.completions.create(
