@@ -1,0 +1,6 @@
+{
+    "dev": {
+        "url": "jsonplaceholder.typicode.com",
+        "PORT": "3002"
+    }
+}

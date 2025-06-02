@@ -7,7 +7,7 @@ db = SQLAlchemy()
 # This file has 13 models
 
 # Users table
-class User(db.Model):
+class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(32), nullable=False, unique=True)
     email = db.Column(db.String(90), nullable=False, unique=True)
@@ -17,19 +17,19 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
 
-    books = db.relationship('Book', backref='user', lazy=True)
-    posts = db.relationship('Post', backref='user', lazy=True)
-    comments = db.relationship('Comment', backref='user', lazy=True)
-    likes = db.relationship('Like', backref='user', lazy=True)
+    books = db.relationship('Book', backref='users', lazy=True)
+    posts = db.relationship('Post', backref='users', lazy=True)
+    comments = db.relationship('Comment', backref='users', lazy=True)
+    likes = db.relationship('Like', backref='users', lazy=True)
     followers = db.relationship('Follower', foreign_keys='Follower.following_id', backref='following', lazy=True)
     following = db.relationship('Follower', foreign_keys='Follower.follower_id', backref='follower', lazy=True)
-    user_books = db.relationship('UserBook', backref='user', lazy=True)
-    summaries = db.relationship('Summary', backref='user', lazy=True)
-    quotes = db.relationship('Quote', backref='user', lazy=True)
-    notifications = db.relationship('Notification', backref='user', lazy=True)
+    user_books = db.relationship('UserBook', backref='users', lazy=True)
+    summaries = db.relationship('Summary', backref='users', lazy=True)
+    quotes = db.relationship('Quote', backref='users', lazy=True)
+    notifications = db.relationship('Notification', backref='users', lazy=True)
 
     def __repr__(self) -> str:
-        return f'User>>>{self.username}'
+        return f'Users>>>{self.id}'
 
 # Books table
 class Book(db.Model):
@@ -42,7 +42,7 @@ class Book(db.Model):
     year_published = db.Column(db.Integer)
     isbn = db.Column(db.String(255))
     
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     user_books = db.relationship('UserBook', backref='book', lazy=True)
     posts = db.relationship('Post', backref='book', lazy=True)
     summaries = db.relationship('Summary', backref='book', lazy=True)
@@ -56,7 +56,7 @@ class Book(db.Model):
 # UserBook table to track the books the user is reading
 class UserBook(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     book_id = db.Column(db.Integer, db.ForeignKey("book.id"))
     status = db.Column(db.String(20))
     personal_note = db.Column(db.Text)
@@ -78,7 +78,7 @@ class Genre(db.Model):
 # Posts table
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     book_id = db.Column(db.Integer, db.ForeignKey("book.id"))
     content = db.Column(db.Text, nullable=False)
     post_image_url = db.Column(db.Text, nullable=True)
@@ -93,7 +93,7 @@ class Post(db.Model):
 # Comments table
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     post_id = db.Column(db.Integer, db.ForeignKey("post.id"))
     comment = db.Column(db.Text, nullable=False)
     posted_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -104,7 +104,7 @@ class Comment(db.Model):
 # Likes table
 class Like(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     post_id = db.Column(db.Integer, db.ForeignKey("post.id"))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -114,8 +114,8 @@ class Like(db.Model):
 # Followers table
 class Follower(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    follower_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    following_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    follower_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    following_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     followed_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self) -> str:
@@ -124,7 +124,7 @@ class Follower(db.Model):
 # Summaries table to store AI generated summaries
 class Summary(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     book_id = db.Column(db.Integer, db.ForeignKey("book.id"))
     summary_text = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -135,7 +135,7 @@ class Summary(db.Model):
 # Quotes table to store user saved quotes
 class Quote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     book_id = db.Column(db.Integer, db.ForeignKey("book.id"))
     quote = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -167,7 +167,7 @@ class BookTag(db.Model):
 # Notifications table
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     message = db.Column(db.Text, nullable=False)
     is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
