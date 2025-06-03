@@ -1,4 +1,4 @@
-from flask import Blueprint, request, url_for, redirect, jsonify
+from flask import Blueprint, request, jsonify
 from ..schema.models import db, Book, Genre
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_201_CREATED

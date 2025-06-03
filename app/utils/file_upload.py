@@ -3,7 +3,6 @@ from werkzeug.utils import secure_filename
 from flask import url_for
 import uuid
 
-
 UPLOAD_FOLDER = 'static/uploads/files'
 ALLOWED_EXTENSIONS = {'pdf', 'txt', 'docx', 'html', 'htm'}
 

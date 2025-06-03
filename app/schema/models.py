@@ -42,6 +42,8 @@ class Book(db.Model):
     file_url = db.Column(db.Text)
     year_published = db.Column(db.Integer)
     isbn = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
     
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     user_books = db.relationship('UserBook', backref='book', lazy=True)
@@ -52,7 +54,6 @@ class Book(db.Model):
 
     def __repr__(self) -> str:
         return f'Book>>>{self.id}'
-
 
 # UserBook table to track the books the user is reading
 class UserBook(db.Model):
