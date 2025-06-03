@@ -2,7 +2,7 @@ from flask import request, Blueprint, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from ..schema.models import db, Users
 from flask_jwt_extended import jwt_required, create_refresh_token, get_jwt_identity, create_access_token
-from ..utils.file_upload import upload_file
+from ..utils.image_upload import upload_image
 from ..constants.http_status_codes import HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT, HTTP_200_OK
 import validators
 
@@ -18,7 +18,6 @@ def register():
         email = request.form.get('email')
         bio = request.form.get('bio')
         password = request.form.get('password')
-        password_hashed = generate_password_hash(password)
 
         # validating the name 
         if len(username) < 3:
@@ -26,6 +25,9 @@ def register():
         
         if not username.isalnum() or " " in username:
             return jsonify({"error": "name should not contain numbers or symbols"}), HTTP_400_BAD_REQUEST
+        
+        if password == '':
+            return jsonify({'error': 'Password field cannot be empty.'})
         
         # validate the user email
         if not validators.email(email):
@@ -41,11 +43,13 @@ def register():
 
         # File upload
         file = request.files.get('file')
+        # generate hashed password
+        password_hashed = generate_password_hash(password)
 
         if not file:
             return jsonify({'error': 'No file provided.'}), HTTP_400_BAD_REQUEST
         
-        file_url = upload_file(file)
+        file_url = upload_image(file)
         if not file_url:
             return jsonify({'error': 'Invalid file type.'}), HTTP_400_BAD_REQUEST
 

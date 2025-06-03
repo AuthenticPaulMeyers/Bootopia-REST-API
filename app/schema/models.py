@@ -84,6 +84,7 @@ class Post(db.Model):
     content = db.Column(db.Text, nullable=False)
     post_image_url = db.Column(db.Text, nullable=True)
     posted_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
     comments = db.relationship('Comment', backref='post', lazy=True)
     likes = db.relationship('Like', backref='post', lazy=True)
 

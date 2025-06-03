@@ -3,6 +3,7 @@ from ..schema.models import db, Book, Genre
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_201_CREATED
 from ..utils.file_upload import upload_file
+from ..utils.image_upload import upload_image
 
 books = Blueprint("books", __name__, static_url_path="static/", url_prefix="/books")
 
@@ -71,7 +72,7 @@ def add_new_book():
             return jsonify({'error': 'No file provided.'}), HTTP_400_BAD_REQUEST
         
         file_url = upload_file(file)
-        cover_url = upload_file(cover)
+        cover_url = upload_image(cover)
         
         if not file_url or not cover_url:
             return jsonify({'error': 'Invalid file type.'}), HTTP_400_BAD_REQUEST
@@ -202,7 +203,7 @@ def update_book(book_id):
                 return jsonify({'error': 'No file provided.'}), HTTP_400_BAD_REQUEST
             
             file_url = upload_file(file)
-            cover_url = upload_file(cover)
+            cover_url = upload_image(cover)
             
             if not file_url or not cover_url:
                 return jsonify({'error': 'Invalid file type.'}), HTTP_400_BAD_REQUEST
