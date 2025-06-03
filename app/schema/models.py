@@ -39,6 +39,7 @@ class Book(db.Model):
     description = db.Column(db.Text)
     genre_id = db.Column(db.Integer, db.ForeignKey("genre.id"))
     cover_image_url = db.Column(db.Text)
+    file_url = db.Column(db.Text)
     year_published = db.Column(db.Integer)
     isbn = db.Column(db.String(255))
     
