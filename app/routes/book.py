@@ -103,7 +103,7 @@ def add_new_book():
         }), HTTP_200_OK
     
 # Get a specific book
-@books.route("/<int:book_id>")
+@books.route("/get/<int:book_id>")
 @jwt_required()
 def get_book(book_id):
 
@@ -126,7 +126,7 @@ def get_book(book_id):
                 'year_published': book.year_published
             }
         }), HTTP_200_OK
-    return jsonify({'error': 'File not found.'}), HTTP_404_NOT_FOUND
+    return jsonify({'error': 'Book not found.'}), HTTP_404_NOT_FOUND
     
 # Search books
 @books.route("/search")
@@ -139,3 +139,19 @@ def search_books():
 @jwt_required()
 def update_book(book_id):
     return 
+
+# Delete a book
+@books.route("/delete/<int:book_id>", methods=['POST', 'GET'])
+@jwt_required()
+def delete_book(book_id):
+    # get user id
+    userId = get_jwt_identity()
+
+    if request.method == 'POST':
+        book = Book.query.filter_by(user_id=userId, id=book_id).first()
+        if not book:
+            return jsonify({'error': 'Book not found.'}), HTTP_404_NOT_FOUND
+
+        db.session.delete(book)
+        db.session.commit()
+        return jsonify({'message': 'Book deleted successfully.'}), HTTP_200_OK
