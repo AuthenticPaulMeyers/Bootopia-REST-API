@@ -97,11 +97,7 @@ def create_post():
                 'post_image_url': post_image_url
             }
         }), HTTP_201_CREATED
-
-        
-
-    return 
-
+    
 # get a specific post
 @posts.route('/<int:post_id>', methods=['POST', 'GET'])
 @jwt_required()
@@ -145,7 +141,53 @@ def get_post(post_id):
 @posts.route('/edit/<int:post_id>', methods=['PUT', 'GET'])
 @jwt_required()
 def update_post(post_id):
-    return
+    userId=get_jwt_identity()
+    
+    post=Post.query.filter_by(id=post_id, user_id=userId).first()
+    
+    if request.method == 'PUT':
+        if post:
+            title = request.form.get('title')
+            content = request.form.get('content')
+            book_title = request.form.get('book_title')
+            post_image = request.files['post_image']
+
+            if not (title and content and book_title):
+                return jsonify({'error': 'Missing required fields.'}), HTTP_400_BAD_REQUEST
+            
+            if not post_image:
+                return jsonify({'error': 'No file selected.'}), HTTP_400_BAD_REQUEST
+
+            # get the book ID
+            book = Book.query.filter_by(title=book_title).first()
+            if not book:
+                return jsonify({'error': 'Book not found.'}), HTTP_404_NOT_FOUND
+            
+            book_id = book.id
+        
+            post_image_url = upload_image(post_image)
+            if not post_image_url:
+                return ({'error': 'Invalid file type.'}), HTTP_400_BAD_REQUEST
+            
+            post.title = title
+            post.content = content
+            post.user_id = userId
+            book.book_id = book_id
+            book.post_image_url = post_image_url
+            db.session.commit()
+
+            return jsonify({
+            'message': 'Post added successfully!',
+            'post':{
+                'title': post.title,
+                'content': post.content,
+                'book_title': post.book.title,
+                'post_image_url': post.post_image_url
+                }
+            }), HTTP_201_CREATED
+        else:
+            return jsonify({'error': f'{HTTP_400_BAD_REQUEST} Bad request'}), HTTP_400_BAD_REQUEST
+
 
 # delete a specific post
 @posts.route('/delete/<int:post_id>', methods=['DELETE', 'GET'])
