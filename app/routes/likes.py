@@ -11,10 +11,22 @@ likes = Blueprint('likes', __name__, static_url_path='static/', url_prefix='/lik
 @likes.route('/<int:post_id>', methods=['POST', 'GET'])
 @jwt_required()
 def get_post(post_id):
-    return 
+
+    userId = get_jwt_identity()
+
+    if request.method == 'POST':
+        post = Post.query.filter_by(user_id=userId, post_id=post_id).first()
+
+        if post:
+            like = Like(user_id=userId, post_id=post_id)
+            db.session.add(like)
+            db.session.commit()
+        return jsonify({'error': 'Post not available.'})
 
 # Unlike a post
 @likes.route('/<int:post_id>', methods=['POST', 'GET'])
 @jwt_required()
 def get_post(post_id):
+    userId = get_jwt_identity()
+
     return 
