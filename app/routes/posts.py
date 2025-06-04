@@ -1,7 +1,7 @@
 from flask import request, Blueprint, jsonify
-from ..schema.models import db, Post, Book
+from ..schema.models import db, Post, Book, Like, Comment
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_201_CREATED
+from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from ..utils.file_upload import upload_file
 from ..utils.image_upload import upload_image
 
@@ -18,17 +18,35 @@ def posts():
         
     if posts:
         for post in posts.items:
+            likes_count = Like.query.filter_by(post_id=post.id).count()
+            comments = Comment.query.filter_by(post_id=post.id).all()
+
+            if not comments:
+                return jsonify({'message': 'No comments currently available.'}), HTTP_204_NO_CONTENT
+            
+            comments_data = [
+                {
+                    'id': comment.id,
+                    'user': comment.users.username,
+                    'content': comment.content,
+                    'date_posted': comment.posted_at
+                }
+                for comment in comments
+            ]
+
             data.append(
                 {
                     'id': post.id,
-                    'title': post.users.username,
-                    'author': post.book.title,
-                    'description': post.content,
-                    'genre': post.post_image_url,
-                    'date_posted': post.posted_at
+                    'user': post.users.username,
+                    'title': post.title,
+                    'book': post.book.title,
+                    'content': post.content,
+                    'post_image_url': post.post_image_url,
+                    'likes': likes_count,
+                    'date_posted': post.posted_at,
                 }
             )
-        return jsonify({'data': data}), HTTP_200_OK
+        return jsonify({'data': data, 'comments': comments_data}), HTTP_200_OK
     return {'message': 'No posts currently available!'}
 
 # create a posts
@@ -88,7 +106,40 @@ def create_post():
 @posts.route('/<int:post_id>', methods=['POST', 'GET'])
 @jwt_required()
 def get_post(post_id):
-    return
+    post = Post.query.filter_by(id=post_id).first()
+    
+    if not post:
+        return jsonify({'error': 'Post not found.'}), HTTP_404_NOT_FOUND
+        
+    likes_count = Like.query.filter_by(post_id=post.id).count()
+    comments = Comment.query.filter_by(post_id=post.id).all()
+
+    if not comments:
+        return jsonify({'message': 'No comments currently available.'}), HTTP_204_NO_CONTENT
+    
+    comments_data = [
+        {
+            'id': comment.id,
+            'user': comment.users.username,
+            'content': comment.content,
+            'date_posted': comment.posted_at
+        }
+        for comment in comments
+    ]
+
+    return jsonify(
+        {
+            'id': post.id,
+            'user': post.users.username,
+            'title': post.title,
+            'book': post.book.title,
+            'content': post.content,
+            'post_image_url': post.post_image_url,
+            'likes': likes_count,
+            'date_posted': post.posted_at,
+            'comments': comments_data
+        }
+    ), HTTP_200_OK
 
 # update a specific post
 @posts.route('/edit/<int:post_id>', methods=['PUT', 'GET'])
@@ -100,5 +151,17 @@ def update_post(post_id):
 @posts.route('/delete/<int:post_id>', methods=['DELETE', 'GET'])
 @jwt_required()
 def delete_post(post_id):
-    return
+    userId = get_jwt_identity()
+
+    if not userId:
+        return jsonify({'error': 'You are not allowed to delete this post.'}), HTTP_400_BAD_REQUEST
+    
+    post = Post.query.filter_by(id=post_id, user_id=userId).first()
+    
+    if not post:
+        return jsonify({'error': 'Post not available.'}), HTTP_404_NOT_FOUND
+    db.session.delete(post)
+    db.session.commit()
+
+    return jsonify({'message': 'Post deleted!'}), HTTP_200_OK
 

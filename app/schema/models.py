@@ -34,7 +34,7 @@ class Users(db.Model):
 # Books table
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(255), nullable=False)
+    title = db.Column(db.String(255), nullable=False, unique=True)
     author = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text)
     genre_id = db.Column(db.Integer, db.ForeignKey("genre.id"))
@@ -99,7 +99,7 @@ class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     post_id = db.Column(db.Integer, db.ForeignKey("post.id"))
-    comment = db.Column(db.Text, nullable=False)
+    content = db.Column(db.Text, nullable=False)
     posted_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self) -> str:
