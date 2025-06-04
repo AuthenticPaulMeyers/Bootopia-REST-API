@@ -83,6 +83,7 @@ class Post(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     book_id = db.Column(db.Integer, db.ForeignKey("book.id"))
     content = db.Column(db.Text, nullable=False)
+    title = db.Column(db.String(255), nullable=False)
     post_image_url = db.Column(db.Text, nullable=True)
     posted_at = db.Column(db.DateTime, default=datetime.utcnow)
     
