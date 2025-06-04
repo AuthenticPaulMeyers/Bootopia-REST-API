@@ -2,7 +2,6 @@ from flask import request, Blueprint, jsonify
 from ..schema.models import db, Post, Book, Like, Comment
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
-from ..utils.file_upload import upload_file
 from ..utils.image_upload import upload_image
 
 # create a blueprint for this route
@@ -187,7 +186,6 @@ def update_post(post_id):
             }), HTTP_201_CREATED
         else:
             return jsonify({'error': f'{HTTP_400_BAD_REQUEST} Bad request'}), HTTP_400_BAD_REQUEST
-
 
 # delete a specific post
 @posts.route('/delete/<int:post_id>', methods=['DELETE', 'GET'])

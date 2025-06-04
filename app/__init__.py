@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from .routes.recommendations import recommender
 from .routes.book import books
 from .auths.user_auth import auth
+from .routes.likes import likes
+from .routes.posts import posts
 
 load_dotenv()
 
@@ -34,6 +36,8 @@ def create_app(test_config=None):
     app.register_blueprint(recommender)
     app.register_blueprint(books)
     app.register_blueprint(auth)
+    app.register_blueprint(posts)
+    app.register_blueprint(likes)
     
 
     # exception handling
