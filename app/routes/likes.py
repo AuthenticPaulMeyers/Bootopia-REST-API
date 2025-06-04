@@ -11,17 +11,19 @@ likes = Blueprint('likes', __name__, static_url_path='static/', url_prefix='/lik
 @likes.route('/<int:post_id>', methods=['POST', 'GET'])
 @jwt_required()
 def get_post(post_id):
-
     userId = get_jwt_identity()
 
-    if request.method == 'POST':
-        post = Post.query.filter_by(user_id=userId, post_id=post_id).first()
+    # Allow users to like a post
+    existing_like = Like.query.filter_by(user_id=userId, post_id=post_id).first()
+    if existing_like:
+        return jsonify({'error': 'Post already liked.'}), HTTP_400_BAD_REQUEST
 
-        if post:
-            like = Like(user_id=userId, post_id=post_id)
-            db.session.add(like)
-            db.session.commit()
-        return jsonify({'error': 'Post not available.'})
+    if request.method == 'POST':
+        like = Like(user_id=userId, post_id=post_id)
+        db.session.add(like)
+        db.session.commit()
+        return jsonify({'message': 'Liked a post.'})
+    return jsonify({'error': 'Post not found.'})
 
 # Unlike a post
 @likes.route('/<int:post_id>', methods=['POST', 'GET'])
@@ -29,4 +31,12 @@ def get_post(post_id):
 def get_post(post_id):
     userId = get_jwt_identity()
 
-    return 
+    # allow users to unlike a post
+    if request.method == 'POST':
+        like = Like.query.filter_by(user_id=userId, post_id=post_id).first()
+        if like:
+            db.session.delete(like)
+            db.session.commit()
+            return jsonify({'message': 'Post unliked successfully.'}), HTTP_200_OK
+        return jsonify({'error': 'Like not found.'}), HTTP_404_NOT_FOUND
+    return jsonify({'error': 'Post not found.'})
