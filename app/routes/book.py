@@ -46,7 +46,7 @@ def get_all_books():
     return {'message': 'No books currently available!'}
 
 # Add new book route
-@books.route("/add_new", methods=['POST', 'GET'])
+@books.route("/add", methods=['POST', 'GET'])
 @jwt_required()
 def add_new_book():
     userId = get_jwt_identity()

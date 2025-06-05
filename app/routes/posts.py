@@ -12,44 +12,44 @@ user_posts = Blueprint('posts', __name__, static_url_path='static/', url_prefix=
 @jwt_required()
 def posts():
 
+    # pagination
+    page=request.args.get('page', 1, type=int)
+    per_page=request.args.get('per_page', 10, type=int)
+
     posts = Post.query.all()
-    data = []
-        
-    if posts:
-        for post in posts.items:
-            likes_count = Like.query.filter_by(post_id=post.id).count()
-            comments = Comment.query.filter_by(post_id=post.id).all()
 
-            if not comments:
-                return jsonify({'message': 'No comments currently available.'}), HTTP_204_NO_CONTENT
+    if not posts:
+        return jsonify({'message': 'No posts currently available!'}), HTTP_204_NO_CONTENT
+
+    posts_data = []
+    for post in posts:
+        likes_count = Like.query.filter_by(post_id=post.id).count()
+        comments = Comment.query.filter_by(post_id=post.id).all()
+        comments_data = [
+            {
+                'id': comment.id,
+                'user': comment.users.username,
+                'content': comment.content,
+                'date_posted': comment.posted_at
+            }
+            for comment in comments
+        ]
+        posts_data.append({
+            'id': post.id,
+            'user': post.users.username,
+            'title': post.title,
+            'book': post.book.title,
+            'content': post.content,
+            'post_image_url': post.post_image_url,
+            'likes': likes_count,
+            'date_posted': post.posted_at
             
-            comments_data = [
-                {
-                    'id': comment.id,
-                    'user': comment.users.username,
-                    'content': comment.content,
-                    'date_posted': comment.posted_at
-                }
-                for comment in comments
-            ]
+        })
 
-            data.append(
-                {
-                    'id': post.id,
-                    'user': post.users.username,
-                    'title': post.title,
-                    'book': post.book.title,
-                    'content': post.content,
-                    'post_image_url': post.post_image_url,
-                    'likes': likes_count,
-                    'date_posted': post.posted_at,
-                }
-            )
-        return jsonify({'data': data, 'comments': comments_data}), HTTP_200_OK
-    return {'message': 'No posts currently available!'}
+    return jsonify({'posts': posts_data, 'comments': comments_data}), HTTP_200_OK
 
 # create a posts
-@user_posts.route('/create_post', methods=['POST', 'GET'])
+@user_posts.route('/new', methods=['POST', 'GET'])
 @jwt_required()
 def create_post():
     userId = get_jwt_identity()
