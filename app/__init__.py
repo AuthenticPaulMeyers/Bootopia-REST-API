@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 import os
 from .schema.models import db
 from flask_jwt_extended import JWTManager
@@ -6,10 +6,13 @@ from dotenv import load_dotenv
 from .routes.recommendations import recommender
 from .routes.book import books
 from .auths.user_auth import auth
-from .routes.likes import likes
-from .routes.posts import posts
+from .routes.likes import user_likes
+from .routes.posts import user_posts
+from flask_migrate import Migrate
+from .constants.http_status_codes import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_503_SERVICE_UNAVAILABLE
 
 load_dotenv()
+
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
@@ -31,26 +34,28 @@ def create_app(test_config=None):
     
     # initialise jwt here
     JWTManager(app)
+    # initialise migrations
+    Migrate(app, db)
 
     # configure blueprints here
     app.register_blueprint(recommender)
     app.register_blueprint(books)
     app.register_blueprint(auth)
-    app.register_blueprint(posts)
-    app.register_blueprint(likes)
+    app.register_blueprint(user_posts)
+    app.register_blueprint(user_likes)
     
 
     # exception handling
-    # @app.errorhandler(HTTP_404_NOT_FOUND)
-    # def handle_file_not_found(error):
-    #     return jsonify({'error': f"{HTTP_404_NOT_FOUND} File not found!"}), HTTP_404_NOT_FOUND
+    @app.errorhandler(HTTP_404_NOT_FOUND)
+    def handle_file_not_found(error):
+        return jsonify({'error': f"{HTTP_404_NOT_FOUND} File not found!"}), HTTP_404_NOT_FOUND
     
-    # @app.errorhandler(HTTP_500_INTERNAL_SERVER_ERROR)
-    # def handle_internalServer_error(error):
-    #     return jsonify({'error': "Something went wrong!"}), HTTP_500_INTERNAL_SERVER_ERROR
+    @app.errorhandler(HTTP_500_INTERNAL_SERVER_ERROR)
+    def handle_internalServer_error(error):
+        return jsonify({'error': "Something went wrong!"}), HTTP_500_INTERNAL_SERVER_ERROR
     
-    # @app.errorhandler(HTTP_503_SERVICE_UNAVAILABLE)
-    # def handle_connection_error(error):
-    #     return jsonify({'error': "Service is currently unavailable. Our team is working on it!"}), HTTP_503_SERVICE_UNAVAILABLE
+    @app.errorhandler(HTTP_503_SERVICE_UNAVAILABLE)
+    def handle_connection_error(error):
+        return jsonify({'error': "Service is currently unavailable. Our team is working on it!"}), HTTP_503_SERVICE_UNAVAILABLE
 
     return app

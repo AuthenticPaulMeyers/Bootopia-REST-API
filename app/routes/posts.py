@@ -5,10 +5,10 @@ from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTT
 from ..utils.image_upload import upload_image
 
 # create a blueprint for this route
-posts = Blueprint('posts', __name__, static_url_path='static/', url_prefix='/posts')
+user_posts = Blueprint('posts', __name__, static_url_path='static/', url_prefix='/posts')
 
 # get all posts
-@posts.route('/')
+@user_posts.route('/')
 @jwt_required()
 def posts():
 
@@ -49,7 +49,7 @@ def posts():
     return {'message': 'No posts currently available!'}
 
 # create a posts
-@posts.route('/create_post', methods=['POST', 'GET'])
+@user_posts.route('/create_post', methods=['POST', 'GET'])
 @jwt_required()
 def create_post():
     userId = get_jwt_identity()
@@ -98,7 +98,7 @@ def create_post():
         }), HTTP_201_CREATED
     
 # get a specific post
-@posts.route('/<int:post_id>', methods=['POST', 'GET'])
+@user_posts.route('/<int:post_id>', methods=['POST', 'GET'])
 @jwt_required()
 def get_post(post_id):
     post = Post.query.filter_by(id=post_id).first()
@@ -137,7 +137,7 @@ def get_post(post_id):
     ), HTTP_200_OK
 
 # update a specific post
-@posts.route('/edit/<int:post_id>', methods=['PUT', 'GET'])
+@user_posts.route('/edit/<int:post_id>', methods=['PUT', 'GET'])
 @jwt_required()
 def update_post(post_id):
     userId=get_jwt_identity()
@@ -188,7 +188,7 @@ def update_post(post_id):
             return jsonify({'error': f'{HTTP_400_BAD_REQUEST} Bad request'}), HTTP_400_BAD_REQUEST
 
 # delete a specific post
-@posts.route('/delete/<int:post_id>', methods=['DELETE', 'GET'])
+@user_posts.route('/delete/<int:post_id>', methods=['DELETE', 'GET'])
 @jwt_required()
 def delete_post(post_id):
     userId = get_jwt_identity()

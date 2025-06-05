@@ -1,16 +1,15 @@
 from flask import request, Blueprint, jsonify
-from ..schema.models import db, Like, Post
+from ..schema.models import db, Like
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
+from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
 # create a blueprint for this route
-likes = Blueprint('likes', __name__, static_url_path='static/', url_prefix='/likes')
-
+user_likes = Blueprint('likes', __name__, url_prefix='/likes')
 
 # Like a post
-@likes.route('/<int:post_id>', methods=['POST', 'GET'])
+@user_likes.route('/<int:post_id>', methods=['POST', 'GET'])
 @jwt_required()
-def get_post(post_id):
+def like_post(post_id):
     userId = get_jwt_identity()
 
     # Allow users to like a post
@@ -22,13 +21,13 @@ def get_post(post_id):
         like = Like(user_id=userId, post_id=post_id)
         db.session.add(like)
         db.session.commit()
-        return jsonify({'message': 'Liked a post.'})
-    return jsonify({'error': 'Post not found.'})
+        return jsonify({'message': 'Liked a post.'}), HTTP_200_OK
+    return jsonify({'error': 'Post not found.'}), HTTP_404_NOT_FOUND
 
 # Unlike a post
-@likes.route('/<int:post_id>', methods=['POST', 'GET'])
+@user_likes.route('/<int:post_id>', methods=['POST', 'GET'])
 @jwt_required()
-def get_post(post_id):
+def unlike_post(post_id):
     userId = get_jwt_identity()
 
     # allow users to unlike a post
@@ -39,4 +38,4 @@ def get_post(post_id):
             db.session.commit()
             return jsonify({'message': 'Post unliked successfully.'}), HTTP_200_OK
         return jsonify({'error': 'Like not found.'}), HTTP_404_NOT_FOUND
-    return jsonify({'error': 'Post not found.'})
+    return jsonify({'error': 'Post not found.'}), HTTP_404_NOT_FOUND
