@@ -21,13 +21,13 @@ def register():
 
         # validating the name 
         if len(username) < 3:
-            return jsonify({'error': "name is too short"}), HTTP_400_BAD_REQUEST
+            return jsonify({'error': "Name is too short"}), HTTP_400_BAD_REQUEST
         
         if not username.isalnum() or " " in username:
-            return jsonify({"error": "name should not contain numbers or symbols"}), HTTP_400_BAD_REQUEST
+            return jsonify({"error": "Name should not contain numbers or symbols"}), HTTP_400_BAD_REQUEST
         
-        if password == '':
-            return jsonify({'error': 'Password field cannot be empty.'})
+        if password == '' or not password or not username or not email or not bio or bio == '':
+            return jsonify({'error': 'Required fields should not be empty.'})
         
         # validate the user email
         if not validators.email(email):
