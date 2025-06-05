@@ -8,6 +8,7 @@ from .routes.book import books
 from .auths.user_auth import auth
 from .routes.likes import user_likes
 from .routes.posts import user_posts
+from .routes.comments import user_comments
 from flask_migrate import Migrate
 from .constants.http_status_codes import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_503_SERVICE_UNAVAILABLE
 
@@ -43,6 +44,7 @@ def create_app(test_config=None):
     app.register_blueprint(auth)
     app.register_blueprint(user_posts)
     app.register_blueprint(user_likes)
+    app.register_blueprint(user_comments)
     
 
     # exception handling

@@ -42,11 +42,12 @@ def posts():
             'content': post.content,
             'post_image_url': post.post_image_url,
             'likes': likes_count,
-            'date_posted': post.posted_at
+            'date_posted': post.posted_at,
+            'comments': comments_data
             
         })
 
-    return jsonify({'posts': posts_data, 'comments': comments_data}), HTTP_200_OK
+    return jsonify({'posts': posts_data}), HTTP_200_OK
 
 # create a posts
 @user_posts.route('/new', methods=['POST', 'GET'])
