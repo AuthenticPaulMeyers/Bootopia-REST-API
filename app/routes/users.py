@@ -1,42 +1,87 @@
-from flask import request, redirect, url_for, Blueprint
-from werkzeug.security import generate_password_hash, check_password_hash
-from ..schema.models import db, User
+from flask import request, Blueprint, jsonify
+from ..schema.models import db, Users, Follower
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
-# create a blueprint for this route
+# Create a blueprint for this route
 
-users = Blueprint('users', __name__, static_url_path='static/', url_prefix='/auth')
-
-# get a user profile route
-@users.route('/<int:user_id>', methods=['POST', 'GET'])
-def get_user_profile(user_id):
-    return 
-
-# update a user profile route
-@users.route('/<int:user_id>', methods=['POST', 'GET'])
-def update_user_profile(user_id):
-    return 
+user_follow = Blueprint('users', __name__, url_prefix='/users')
 
 # follow a user route
-@users.route('/<int:user_id>/follow', methods=['POST', 'GET'])
+@user_follow.route('/<int:user_id>/follow', methods=['POST'])
+@jwt_required()
 def follow_user(user_id):
-    return
+    current_user_id = get_jwt_identity()
+    if current_user_id == user_id:
+        return jsonify({"error": "You cannot follow yourself."}), HTTP_400_BAD_REQUEST
+
+    user_to_follow = Users.query.get(user_id)
+    if not user_to_follow:
+        return jsonify({"error": "User not found."}), HTTP_404_NOT_FOUND
+
+    existing_follow = Follower.query.filter_by(follower_id=current_user_id, followed_id=user_id).first()
+    if existing_follow:
+        return jsonify({"message": "Already following this user."}), HTTP_200_OK
+
+    new_follow = Follower(follower_id=current_user_id, followed_id=user_id)
+    db.session.add(new_follow)
+    db.session.commit()
+
+    return {"message": f"You are now following {user_to_follow.username}."}, HTTP_201_CREATED
 
 # unfollow a user route
-@users.route('/<int:user_id>/unfollow', methods=['POST', 'GET'])
-def follow_user(user_id):
-    return
+@user_follow.route('/<int:followed_user_id>/unfollow', methods=['POST'])
+def unfollow_user(followed_user_id):
+    current_user_id = get_jwt_identity()
+    if current_user_id == followed_user_id:
+        return jsonify({"error": "You cannot unfollow yourself."}), HTTP_400_BAD_REQUEST
+    
+    user_to_unfollow = Users.query.get(followed_user_id)
+    if not user_to_unfollow:
+        return jsonify({'error': 'User not found.'}), HTTP_404_NOT_FOUND
 
-# get a user profile route
-@users.route('/<int:user_id>', methods=['POST', 'GET'])
-def user_profile(user_id):
-    return
+    unfollow = Follower.query.filter_by(followed_id=followed_user_id, follower_id=current_user_id).first()
+    if not unfollow:
+        return jsonify({"error": "You are not following this user."}), HTTP_400_BAD_REQUEST
+    
+    db.session.delete(unfollow)
+    db.session.commit()
+
+    return {"message": "Successfully unfollowed."}, HTTP_201_CREATED
+
 
 # get user's followers route
-@users.route('/<int:user_id>/followers')
+@user_follow.route('/<int:user_id>/followers', methods=['GET'])
 def get_followers(user_id):
-    return 
+    user = Users.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found.'}), HTTP_404_NOT_FOUND
+
+    followers = Follower.query.filter_by(followed_id=user_id).all()
+    follower_list = [
+        {
+            "id": follower.follower.id,
+            "username": follower.follower.username
+        }
+        for follower in followers if follower.follower
+    ]
+
+    return jsonify({"followers": follower_list}), HTTP_200_OK
 
 # get user's following route
-@users.route('/<int:user_id>/following', methods=['POST', 'GET'])
-def get_user_following():
-    return
+@user_follow.route('/<int:user_id>/following', methods=['GET'])
+def get_user_following(user_id):
+    user = Users.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found.'}), HTTP_404_NOT_FOUND
+
+    following = Follower.query.filter_by(follower_id=user_id).all()
+    following_list = [
+        {
+            "id": follow.followed.id,
+            "username": follow.followed.username
+        }
+        for follow in following if follow.followed
+    ]
+
+    return jsonify({"following": following_list}), HTTP_200_OK
