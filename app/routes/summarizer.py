@@ -1,9 +1,8 @@
 from flask import request, Blueprint, jsonify
-from ..constants.http_status_codes import HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_500_INTERNAL_SERVER_ERROR
-from ..services.get_summary import summarize_section, MODEL
+from ..constants.http_status_codes import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
+from ..services.get_summary import summarize_section
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..schema.models import Book, Summary, db
-import os
 from ..utils.limit_tokens_count import truncate_text_to_token_limit
 from ..utils.downloads import download_or_get_local_file
 from ..utils.get_text_from_pdf import extract_text_content

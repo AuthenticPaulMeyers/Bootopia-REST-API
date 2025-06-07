@@ -1,7 +1,6 @@
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
-from ..utils.get_text_from_pdf import extract_text_content
 
 load_dotenv()
 
