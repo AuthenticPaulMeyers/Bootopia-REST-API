@@ -55,7 +55,7 @@ class Book(db.Model):
     def __repr__(self) -> str:
         return f'Book>>>{self.id}'
 
-# UserBook table to track the books the user is reading
+# UserBook/Bookmark/Favourites/Reading list table to track the books the user is reading
 class UserBook(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
@@ -75,7 +75,6 @@ class Genre(db.Model):
 
     def __repr__(self) -> str:
         return f'Genre>>>{self.id}'
-
 
 # Posts table
 class Post(db.Model):
