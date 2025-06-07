@@ -50,6 +50,7 @@ class Book(db.Model):
     posts = db.relationship('Post', backref='book', lazy=True)
     summaries = db.relationship('Summary', backref='book', lazy=True)
     quotes = db.relationship('Quote', backref='book', lazy=True)
+    readinglist = db.relationship('ReadingList', backref='book', lazy=True)
     tags = db.relationship('BookTag', backref='book', lazy=True)
 
     def __repr__(self) -> str:
@@ -150,8 +151,6 @@ class Quote(db.Model):
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False, unique=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
     book_tags = db.relationship('BookTag', backref='tag_obj', lazy=True)
 
     def __repr__(self) -> str:
@@ -177,3 +176,13 @@ class Notification(db.Model):
 
     def __repr__(self) -> str:
         return f'Notification>>>{self.id}'
+
+# BookTags table
+class ReadingList(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    book_id = db.Column(db.Integer, db.ForeignKey("book.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self) -> str:
+        return f'Favorite>>>{self.id}'
