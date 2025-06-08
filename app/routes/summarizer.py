@@ -1,5 +1,5 @@
 from flask import request, Blueprint, jsonify
-from ..constants.http_status_codes import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
+from ..constants.http_status_codes import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_200_OK
 from ..services.get_summary import summarize_section
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..schema.models import Book, Summary, db
@@ -50,3 +50,22 @@ def summarise_book(book_id):
                 "status": "error",
                 "message": str(e)
             }), HTTP_500_INTERNAL_SERVER_ERROR
+
+
+@summarize.route('/summary/<int:summary_id>', methods=['GET', 'POST'])
+@jwt_required()
+def get_summarized_text(summary_id):
+    user_id = get_jwt_identity()
+
+    summary = Summary.query.filter_by(user_id=user_id, id=summary_id).first()
+
+    if not summary:
+        return jsonify({'error': 'Summary not found.'}), HTTP_404_NOT_FOUND
+    
+    return jsonify({
+        'summary': {
+            'book': summary.book.title,
+            'author': summary.book.author,
+            'summary_text': summary.summary_text
+        }
+    }), HTTP_200_OK
