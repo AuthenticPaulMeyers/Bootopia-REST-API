@@ -14,7 +14,7 @@ def bookmarks():
     user_id = get_jwt_identity()
 
     # get all bookmarks
-    all_bookmarks = UserBook.query.filter(user_id=user_id).all()
+    all_bookmarks = UserBook.query.filter_by(user_id=user_id).all()
 
     if not all_bookmarks:
         return jsonify({'message': 'No bookmarks currently available.'}), HTTP_200_OK

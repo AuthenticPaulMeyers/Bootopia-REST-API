@@ -51,7 +51,6 @@ def summarise_book(book_id):
                 "message": str(e)
             }), HTTP_500_INTERNAL_SERVER_ERROR
 
-
 @summarize.route('/summary/<int:summary_id>')
 @jwt_required()
 def get_summarized_text(summary_id):
@@ -69,3 +68,24 @@ def get_summarized_text(summary_id):
             'summary_text': summary.summary_text
         }
     }), HTTP_200_OK
+
+# List all summaries
+@summarize.route('/summaries/<int:book_id>/all')
+@jwt_required()
+def get_all_summaries(book_id):
+    
+    summaries = Summary.query.filter_by(book_id=book_id).all()
+
+    if not summaries:
+        return jsonify({'error': 'No summaries found.'}), HTTP_404_NOT_FOUND
+    
+    summary_data = []
+
+    for summary in summaries:
+        summary_data.append({
+            'book': summary.book.title,
+            'author': summary.book.author,
+            'summary_text': summary.summary_text
+        })
+    return ({'summaries': summary_data}), HTTP_200_OK
+
