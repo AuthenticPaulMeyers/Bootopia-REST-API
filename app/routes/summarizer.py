@@ -52,7 +52,7 @@ def summarise_book(book_id):
             }), HTTP_500_INTERNAL_SERVER_ERROR
 
 
-@summarize.route('/summary/<int:summary_id>', methods=['GET', 'POST'])
+@summarize.route('/summary/<int:summary_id>')
 @jwt_required()
 def get_summarized_text(summary_id):
     user_id = get_jwt_identity()

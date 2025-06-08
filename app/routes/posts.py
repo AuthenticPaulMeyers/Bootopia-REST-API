@@ -49,6 +49,44 @@ def posts():
 
     return jsonify({'posts': posts_data}), HTTP_200_OK
 
+# get user posts
+@user_posts.route('/user/<int:user_id>')
+@jwt_required()
+def get_posts_from_single_user(user_id):
+
+    posts = Post.query.filter_by(user_id=user_id).all()
+
+    if not posts:
+        return jsonify({'message': 'No posts currently available!'}), HTTP_204_NO_CONTENT
+
+    posts_data = []
+    for post in posts:
+        likes_count = Like.query.filter_by(post_id=post.id).count()
+        comments = Comment.query.filter_by(post_id=post.id).all()
+        comments_data = [
+            {
+                'id': comment.id,
+                'user': comment.users.username,
+                'content': comment.content,
+                'date_posted': comment.posted_at
+            }
+            for comment in comments
+        ]
+        posts_data.append({
+            'id': post.id,
+            'user': post.users.username,
+            'title': post.title,
+            'book': post.book.title,
+            'content': post.content,
+            'post_image_url': post.post_image_url,
+            'likes': likes_count,
+            'date_posted': post.posted_at,
+            'comments': comments_data
+            
+        })
+
+    return jsonify({'posts': posts_data}), HTTP_200_OK
+
 # create a posts
 @user_posts.route('/new', methods=['POST', 'GET'])
 @jwt_required()

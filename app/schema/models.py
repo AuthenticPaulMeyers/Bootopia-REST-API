@@ -61,7 +61,7 @@ class UserBook(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     book_id = db.Column(db.Integer, db.ForeignKey("book.id"))
-    status = db.Column(db.String(20))
+    status = db.Column(db.String(20), default='want_to_read')
     personal_note = db.Column(db.Text)
     added_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -92,7 +92,6 @@ class Post(db.Model):
 
     def __repr__(self) -> str:
         return f'Post>>>{self.id}'
-
 
 # Comments table
 class Comment(db.Model):
@@ -176,13 +175,3 @@ class Notification(db.Model):
 
     def __repr__(self) -> str:
         return f'Notification>>>{self.id}'
-
-# BookTags table
-class ReadingList(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    book_id = db.Column(db.Integer, db.ForeignKey("book.id"))
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def __repr__(self) -> str:
-        return f'Favorite>>>{self.id}'
