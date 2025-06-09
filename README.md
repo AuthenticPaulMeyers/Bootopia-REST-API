@@ -1,6 +1,6 @@
-# bootopia
+# Bootopia
 
-Bootopia is a social network for book lovers where users can:
+## Bootopia is a social network for book lovers where users can:
 
 1. Share their favorite books and what they’re currently reading.
 
