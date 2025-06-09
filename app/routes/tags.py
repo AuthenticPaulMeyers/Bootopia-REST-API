@@ -23,7 +23,7 @@ def get_tags():
                 'id': tag.id,
                 'name': tag.name
             })
-        return ({'tag': data_tag}), HTTP_200_OK
+        return ({'tags': data_tag}), HTTP_200_OK
     else:
         tag_name = request.json['name']
 
