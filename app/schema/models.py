@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 # initialise the database
 db = SQLAlchemy()
 
-# This file has 13 models
+# This file has 12 models
 
 # Users table
 class Users(db.Model):
@@ -49,7 +49,6 @@ class Book(db.Model):
     posts = db.relationship('Post', backref='book', lazy=True)
     summaries = db.relationship('Summary', backref='book', lazy=True)
     quotes = db.relationship('Quote', backref='book', lazy=True)
-    readinglist = db.relationship('ReadingList', backref='book', lazy=True)
     tags = db.relationship('BookTag', backref='book', lazy=True)
 
     def __repr__(self) -> str:

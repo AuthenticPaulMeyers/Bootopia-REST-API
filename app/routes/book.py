@@ -1,11 +1,11 @@
 from flask import Blueprint, request, jsonify
-from ..schema.models import db, Book, Genre
+from ..schema.models import db, Book, BookTag, Tag
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_201_CREATED
 from ..utils.file_upload import upload_file
 from ..utils.image_upload import upload_image
 
-books = Blueprint("books", __name__, static_url_path="static/", url_prefix="/books")
+books = Blueprint("books", __name__, static_url_path="static/", url_prefix="/api/v1.0/books")
 
 # Get books route
 @books.route("/", methods=['POST', 'GET'])
@@ -27,7 +27,6 @@ def get_all_books():
                     'title': book.title,
                     'author': book.author,
                     'description': book.description,
-                    'genre': book.genre.name,
                     'cover_image_url': book.cover_image_url,
                     'year_published': book.year_published,
                     'isbn': book.isbn
@@ -46,7 +45,7 @@ def get_all_books():
     return {'message': 'No books currently available!'}
 
 # Add new book route
-@books.route("/add", methods=['POST', 'GET'])
+@books.route("/new", methods=['POST', 'GET'])
 @jwt_required()
 def add_new_book():
     userId = get_jwt_identity()
@@ -55,16 +54,15 @@ def add_new_book():
         title = request.form.get('title')
         author = request.form.get('author')
         description = request.form.get('description')
-        genre_name = request.form.get('genre_name')
         year_published = request.form.get('year_published')
         isbn = request.form.get('isbn')
         cover = request.files.get('cover')
         file = request.files.get('file')
 
-        if title == '' or author == '' or genre_name == '':
+        if title == '' or author == '' or description == '':
             return jsonify({'error': 'Required fields cannot be null.'}), HTTP_400_BAD_REQUEST
         
-        if not genre_name:
+        if not description:
             return jsonify({'error': 'Required fields cannot be null.'}), HTTP_400_BAD_REQUEST
             
 
@@ -76,16 +74,8 @@ def add_new_book():
         
         if not file_url or not cover_url:
             return jsonify({'error': 'Invalid file type.'}), HTTP_400_BAD_REQUEST
-        
-        # Check if the genre already exists, if not, add it and get the id
-        get_genre = Genre.query.filter_by(name=genre_name).first()
-        if not get_genre:
-            new_genre = Genre(name=genre_name)
-            db.session.add(new_genre)
-            db.session.commit()
-            get_genre = new_genre
-        
-        book = Book(title=title, author=author, description=description, genre_id=get_genre.id, isbn=isbn, year_published=year_published, cover_image_url=cover_url, file_url=file_url, user_id=userId)
+
+        book = Book(title=title, author=author, description=description, isbn=isbn, year_published=year_published, cover_image_url=cover_url, file_url=file_url, user_id=userId)
         db.session.add(book)
         db.session.commit()
 
@@ -95,7 +85,6 @@ def add_new_book():
                 'title': title,
                 'author': author,
                 'description': description,
-                'genre': genre_name,
                 'isbn': isbn,
                 'year_published': year_published,
                 'cover_image_url': cover_url,
@@ -119,7 +108,6 @@ def get_book(book_id):
                 'id': book.id,
                 'author': book.author,
                 'title': book.title,
-                'genre': book.genre.name,
                 'description': book.description,
                 'cover_url': book.cover_image_url,
                 'file_url': book.file_url,
@@ -130,49 +118,47 @@ def get_book(book_id):
     return jsonify({'error': 'Book not found.'}), HTTP_404_NOT_FOUND
     
 # Search books
-@books.route("/search")
+@books.route("/search", methods=['POST'])
 @jwt_required()
 def search_books():
     # implement a book search where users can search books based on the title or genre
     title = request.args.get('title')
-    genre = request.args.get('genre')
     author = request.args.get('author')
 
     # get user id
     userId = get_jwt_identity()
 
-    query = Book.query.filter_by(user_id=userId)
+    if request.method == 'POST':
+        query = Book.query.filter_by(user_id=userId)
 
-    if title:
-        query = query.filter(Book.title.ilike(f"%{title}%"))
-    if genre:
-        query = query.join(Genre).filter(Genre.name.ilike(f"%{genre}%"))
-    if author:
-        query = query.filter(Book.author.ilike(f"%{author}%"))
+        if title:
+            query = query.filter(Book.title.ilike(f"%{title}%"))
+       
+        if author:
+            query = query.filter(Book.author.ilike(f"%{author}%"))
 
-    books = query.all()
-    search_result_count = len(books)
+        books = query.all()
+        search_result_count = len(books)
 
-    if not books:
-        return jsonify({'message': 'No books found matching the criteria.'}), HTTP_404_NOT_FOUND
+        if not books:
+            return jsonify({'message': 'No books found matching the criteria.'}), HTTP_404_NOT_FOUND
 
-    data = []
-    for book in books:
-        data.append({
-            'id': book.id,
-            'title': book.title,
-            'author': book.author,
-            'description': book.description,
-            'genre': book.genre.name,
-            'cover_image_url': book.cover_image_url,
-            'year_published': book.year_published,
-            'isbn': book.isbn
-        })
+        data = []
+        for book in books:
+            data.append({
+                'id': book.id,
+                'title': book.title,
+                'author': book.author,
+                'description': book.description,
+                'cover_image_url': book.cover_image_url,
+                'year_published': book.year_published,
+                'isbn': book.isbn
+            })
 
-    return jsonify({
-        'results_count': search_result_count,
-        'books': data
-        }), HTTP_200_OK
+        return jsonify({
+            'results_count': search_result_count,
+            'books': data
+            }), HTTP_200_OK
 
 # Updated book route
 @books.route("/update/<int:book_id>", methods=['PUT', 'GET'])
@@ -181,22 +167,21 @@ def update_book(book_id):
     userId=get_jwt_identity()
     
     book=Book.query.filter_by(id=book_id, user_id=userId).first()
-    
+
     if request.method == 'PUT':
         if book:
             title = request.form.get('title')
             author = request.form.get('author')
             description = request.form.get('description')
-            genre_name = request.form.get('genre_name')
             year_published = request.form.get('year_published')
             isbn = request.form.get('isbn')
             cover = request.files.get('cover')
             file = request.files.get('file')
 
-            if title == '' or author == '' or genre_name == '':
+            if title == '' or author == '' or description == '':
                 return jsonify({'error': 'Required fields cannot be null.'}), HTTP_400_BAD_REQUEST
             
-            if not genre_name:
+            if not description:
                 return jsonify({'error': 'Required fields cannot be null.'}), HTTP_400_BAD_REQUEST
                 
             if not file or not cover:
@@ -208,38 +193,30 @@ def update_book(book_id):
             if not file_url or not cover_url:
                 return jsonify({'error': 'Invalid file type.'}), HTTP_400_BAD_REQUEST
 
-            # Check if the genre already exists, if not, add it and get the id
-            get_genre = Genre.query.filter_by(name=genre_name).first()
-            if not get_genre:
-                new_genre = Genre(name=genre_name)
-                db.session.add(new_genre)
-                db.session.commit()
-                get_genre = new_genre
-            
             book.title = title
             book.author = author
             book.description = description
             book.year_published = year_published
             book.isbn = isbn
-            book.genre_id = get_genre.id
             book.file_url = file_url
             book.cover_image_url = cover_url
             db.session.commit()
 
             return jsonify({
-                'id': book.id,
-                'title': book.title,
-                'description': book.description,
-                'author': book.author,
-                'isbn': book.isbn,
-                'genre': book.genre.name,
-                'year_published': book.year_published,
-                'file_url': book.file_url,
-                'cover_url': book.cover_image_url
-                # 'updated_at': book.created_at
+                'message': 'Book updated successfully.',
+                'book':{
+                    'id': book.id,
+                    'title': book.title,
+                    'description': book.description,
+                    'author': book.author,
+                    'isbn': book.isbn,
+                    'year_published': book.year_published,
+                    'file_url': book.file_url,
+                    'cover_url': book.cover_image_url,
+                    'updated_at': book.updated_at
+                }
             }), HTTP_201_CREATED
-        else:
-            return jsonify({'error': f'{HTTP_400_BAD_REQUEST} Bad request'}), HTTP_400_BAD_REQUEST
+        return jsonify({'error': f'{HTTP_404_NOT_FOUND} Book not found.'}), HTTP_404_NOT_FOUND
 
 # Delete a book
 @books.route("/delete/<int:book_id>", methods=['DELETE'])

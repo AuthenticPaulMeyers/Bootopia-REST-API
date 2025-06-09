@@ -7,7 +7,7 @@ from ..utils.limit_tokens_count import truncate_text_to_token_limit
 from ..utils.downloads import download_or_get_local_file
 from ..utils.get_text_from_pdf import extract_text_content
 
-summarize = Blueprint('summarize', __name__, static_folder='static', url_prefix='/summarize')
+summarize = Blueprint('summarize', __name__, static_folder='static', url_prefix='/api/v1.0/summarize')
 
 @summarize.route('/book/<int:book_id>', methods=['POST'])
 @jwt_required()

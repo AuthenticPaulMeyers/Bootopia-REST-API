@@ -10,7 +10,7 @@ user_bookmarks = Blueprint('bookmark', __name__, static_url_path='static/', url_
 # get all bookmarks
 @user_bookmarks.route('/')
 @jwt_required()
-def bookmarks():
+def get_all_bookmarks():
     user_id = get_jwt_identity()
 
     # get all bookmarks
@@ -30,12 +30,12 @@ def bookmarks():
             'book_file_url': bookmark.book.file_url,
             'book_cover_image_url': bookmark.cover_image_url,
         })
-    return ({'bookamrks': bookmark_data}), HTTP_200_OK
+    return ({'bookmarks': bookmark_data}), HTTP_200_OK
 
 # add to bookmarks
 @user_bookmarks.route('/add/<int:book_id>/', methods=['POST'])
 @jwt_required()
-def bookmarks(book_id):
+def add_bookmarks(book_id):
     user_id = get_jwt_identity()
 
     if request.method == 'POST':
@@ -49,7 +49,7 @@ def bookmarks(book_id):
 # Remove from bookmark
 @user_bookmarks.route('/<int:book_id>/remove', methods=['POST'])
 @jwt_required()
-def bookmarks(book_id):
+def delete_bookmarks(book_id):
     user_id = get_jwt_identity()
     bookmark = UserBook.query.filter_by(user_id=user_id, book_id=book_id).first()
 
