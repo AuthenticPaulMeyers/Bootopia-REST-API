@@ -37,7 +37,6 @@ class Book(db.Model):
     title = db.Column(db.String(255), nullable=False, unique=True)
     author = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text)
-    genre_id = db.Column(db.Integer, db.ForeignKey("genre.id"))
     cover_image_url = db.Column(db.Text)
     file_url = db.Column(db.Text)
     year_published = db.Column(db.Integer)
@@ -67,15 +66,6 @@ class UserBook(db.Model):
 
     def __repr__(self) -> str:
         return f'UserBook>>>{self.id}'
-
-# Genre table
-class Genre(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(30), nullable=False, unique=True)
-    books = db.relationship('Book', backref='genre', lazy=True)
-
-    def __repr__(self) -> str:
-        return f'Genre>>>{self.id}'
 
 # Posts table
 class Post(db.Model):
