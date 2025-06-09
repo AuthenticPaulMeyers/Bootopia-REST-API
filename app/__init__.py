@@ -13,11 +13,11 @@ from .routes.users import user_follow
 from .routes.summarizer import summarize
 from .routes.user_books import user_bookmarks
 from .routes.quotes import user_quotes
+from .routes.tags import tag_bp
 from flask_migrate import Migrate
 from .constants.http_status_codes import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_503_SERVICE_UNAVAILABLE
 
 load_dotenv()
-
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
@@ -53,6 +53,7 @@ def create_app(test_config=None):
     app.register_blueprint(summarize)
     app.register_blueprint(user_bookmarks)
     app.register_blueprint(user_quotes)
+    app.register_blueprint(tag_bp)
     
     
     # exception handling
