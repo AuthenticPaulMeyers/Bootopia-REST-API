@@ -21,6 +21,7 @@ def like_post(post_id):
         like = Like(user_id=userId, post_id=post_id)
         db.session.add(like)
         db.session.commit()
+        
         return jsonify({'message': 'Liked a post.'}), HTTP_200_OK
     return jsonify({'error': 'Post not found.'}), HTTP_404_NOT_FOUND
 
