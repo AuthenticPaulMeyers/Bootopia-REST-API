@@ -14,7 +14,7 @@ def get_notifications():
     notifications = Notification.query.filter_by(user_id=user_id).order_by(Notification.created_at.desc()).all()
 
     if not notifications or notifications == '':
-        return jsonify({'message': 'You do not have any notifications.'}), HTTP_200_OK
+        return jsonify({'message': 'You do not have any notification.'}), HTTP_200_OK
     
     notifications_data = []
     count = len(notifications)
@@ -22,7 +22,8 @@ def get_notifications():
         notifications_data.append({
             'id' : notification.id,
             'message' : notification.message,
-            'created_at' : notification.created_at
+            'created_at' : notification.created_at,
+            'is_read': notification.is_read
         })
     return jsonify({'notifications': notifications_data, 'count': count}), HTTP_200_OK
 
@@ -37,11 +38,15 @@ def read_notification(note_id):
     if not notification:
         return jsonify({'error': 'Notification not found.'}), HTTP_404_NOT_FOUND
     
+    notification.is_read = False
+    db.session.commit()
+    
     return jsonify({
         'notification':{
             'id': notification.id,
             'message': notification.message,
-            'created_at': notification.created_at
+            'created_at': notification.created_at,
+            'is_read': notification.is_read
         }
     }), HTTP_200_OK
 
@@ -60,24 +65,35 @@ def delete_notification(note_id):
         # delete notification
         db.session.delete(notification)
         db.session.commit()
-        return jsonify({'message': 'Comment deleted successfully.'}), HTTP_200_OK
+        return jsonify({'message': 'Notification deleted successfully.'}), HTTP_200_OK
     return None
 
 # Mark all as read
-@notification_bp.route('/mark_all_as_read', methods=['GET', 'POST'])
+@notification_bp.route('/mark_as_read')
 @jwt_required()
 def mark_all_notifications():
     user_id = get_jwt_identity()
 
-    notifications = Notification.query.filter_by(user_id=user_id).first()
+    notifications = Notification.query.filter_by(user_id=user_id).all()
+    count = len(notifications)
 
     if not notifications or notifications == '':
         return jsonify({'message': 'You do not have any notifications.'}), HTTP_200_OK
+    
+    notifications_data = []
 
     for notification in notifications:
         if notification.is_read == 'false' or notification.is_read == False:
             # then set it to true to mark it as read
             notification.is_read = True
-            return True, HTTP_200_OK
+            db.session.commit()
+
+            notifications_data.append({
+                'id' : notification.id,
+                'message' : notification.message,
+                'created_at' : notification.created_at,
+                'is_read': notification.is_read
+            })
+    return jsonify({'notifications': notifications_data, 'count': count}), HTTP_200_OK
 
 
