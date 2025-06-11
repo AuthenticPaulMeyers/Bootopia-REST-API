@@ -4,7 +4,6 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 # Create a blueprint for this route
-
 user_follow = Blueprint('users', __name__, url_prefix='/api/v1.0/users')
 
 # follow a user route
@@ -15,27 +14,27 @@ def follow_user(user_id):
     if current_user_id == user_id:
         return jsonify({"error": "You cannot follow yourself."}), HTTP_400_BAD_REQUEST
 
+    if request.method == 'POST':
+        user_to_follow = Users.query.get(user_id)
+        if not user_to_follow:
+            return jsonify({"error": "User not found."}), HTTP_404_NOT_FOUND
 
-    user_to_follow = Users.query.get(user_id)
-    if not user_to_follow:
-        return jsonify({"error": "User not found."}), HTTP_404_NOT_FOUND
+        existing_follow = Follower.query.filter_by(follower_id=current_user_id, following_id=user_id).first()
+        if existing_follow:
+            return jsonify({"message": "Already following this user."}), HTTP_200_OK
 
-    existing_follow = Follower.query.filter_by(follower_id=current_user_id, following_id=user_id).first()
-    if existing_follow:
-        return jsonify({"message": "Already following this user."}), HTTP_200_OK
+        new_follow = Follower(follower_id=current_user_id, following_id=user_id)
+        db.session.add(new_follow)
+        db.session.commit()
 
-    new_follow = Follower(follower_id=current_user_id, following_id=user_id)
-    db.session.add(new_follow)
-    db.session.commit()
+        # Add notification to the user being followed
+        current_user=Users.query.filter_by(id=current_user_id).first()
+        message = f"{current_user.username} is now following you."
+        notification = Notification(user_id=user_id, message=message)
+        db.session.add(notification)
+        db.session.commit()
 
-    # Add notification to the user being followed
-    user=Users.query.filter_by(id=current_user_id).first()
-    message = f"{user.username} is now following you."
-    notification = Notification(user_id=user_id, message=message)
-    db.session.add(notification)
-    db.session.commit()
-
-    return {"message": f"You are now following {user_to_follow.username}."}, HTTP_201_CREATED
+        return {"message": f"You are now following {user_to_follow.username}."}, HTTP_201_CREATED
 
 # unfollow a user route
 @user_follow.route('/<int:following_user_id>/unfollow', methods=['POST'])
