@@ -1,7 +1,7 @@
 from flask import request, Blueprint, jsonify
 from ..schema.models import db, Notification
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from ..constants.http_status_codes import HTTP_200_OK, HTTP_404_NOT_FOUND
 
 # create a blueprint for this route
 notification_bp = Blueprint('notifications', __name__, url_prefix='/api/v1.0/notifications')
@@ -38,7 +38,7 @@ def read_notification(note_id):
     if not notification:
         return jsonify({'error': 'Notification not found.'}), HTTP_404_NOT_FOUND
     
-    notification.is_read = False
+    notification.is_read = True
     db.session.commit()
     
     return jsonify({
