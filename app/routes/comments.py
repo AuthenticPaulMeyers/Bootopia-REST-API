@@ -1,10 +1,10 @@
 from flask import request, Blueprint, jsonify
-from ..schema.models import db, Comment, Notification
+from ..schema.models import db, Comment, Notification, Post, Users
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..constants.http_status_codes import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED
 
 # create a blueprint for this route
-user_comments = Blueprint('comments', __name__, url_prefix='/comments')
+user_comments = Blueprint('comments', __name__, url_prefix='/api/v1.0/comments')
 
 # Comment a post
 @user_comments.route('/<int:post_id>/comment', methods=['POST', 'GET'])
@@ -12,7 +12,9 @@ user_comments = Blueprint('comments', __name__, url_prefix='/comments')
 def comment_post(post_id):
     userId = get_jwt_identity()
 
-    post = post.query.get(post_id)
+    current_user = Users.query.get(userId)
+
+    post = Post.query.get(post_id)
     if not post:
         return jsonify({'error': 'Post not found.'}), HTTP_404_NOT_FOUND
     
@@ -23,11 +25,11 @@ def comment_post(post_id):
         db.session.add(comment)
         db.session.commit()
         # send notification to the post author
-        message = f"{userId.username} commented on your post."
+        message = f"{current_user.username} commented on your post."
         notification = Notification(user_id=post.users.id, message=message)
         db.session.add(notification)
         db.session.commit()
-        
+
         return jsonify({'message': 'Comment added.'}), HTTP_201_CREATED
     return jsonify({'error': 'Post not found.'}), HTTP_404_NOT_FOUND
 

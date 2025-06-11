@@ -1,5 +1,5 @@
 from flask import request, Blueprint, jsonify
-from ..schema.models import db, Like, Users, Notification, Post
+from ..schema.models import db, Likes, Users, Notification, Post
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
@@ -11,23 +11,23 @@ user_likes = Blueprint('likes', __name__, url_prefix='/likes')
 @jwt_required()
 def like_post(post_id):
     userId = get_jwt_identity()
-
+    current_user = Users.query.get(userId)
     # get post with that id
-    post = post.query.get(post_id)
+    post = Post.query.get(post_id)
     if not post:
         return jsonify({'error': 'Post not found.'}), HTTP_404_NOT_FOUND
     
     # Allow users to like a post
-    existing_like = Like.query.filter_by(user_id=userId, post_id=post_id).first()
+    existing_like = Likes.query.filter_by(user_id=userId, post_id=post_id).first()
     if existing_like:
         return jsonify({'error': 'Post already liked.'}), HTTP_400_BAD_REQUEST
 
     if request.method == 'POST':
-        like = Like(user_id=userId, post_id=post_id)
+        like = Likes(user_id=userId, post_id=post_id)
         db.session.add(like)
         db.session.commit()
 
-        message = f"{userId.username} liked your post."
+        message = f"{current_user.username} liked your post."
         notification = Notification(user_id=post.users.id, message=message)
         db.session.add(notification)
         db.session.commit()
@@ -42,7 +42,7 @@ def unlike_post(post_id):
 
     # allow users to unlike a post
     if request.method == 'POST':
-        like = Like.query.filter_by(user_id=userId, post_id=post_id).first()
+        like = Likes.query.filter_by(user_id=userId, post_id=post_id).first()
         if like:
             db.session.delete(like)
             db.session.commit()

@@ -20,7 +20,7 @@ class Users(db.Model):
     books = db.relationship('Book', backref='users', lazy=True)
     posts = db.relationship('Post', backref='users', lazy=True)
     comments = db.relationship('Comment', backref='users', lazy=True)
-    likes = db.relationship('Like', backref='users', lazy=True)
+    likes = db.relationship('Likes', backref='users', lazy=True)
     followers = db.relationship('Follower', foreign_keys='Follower.following_id', backref='following', lazy=True)
     following = db.relationship('Follower', foreign_keys='Follower.follower_id', backref='follower', lazy=True)
     user_books = db.relationship('UserBook', backref='users', lazy=True)
@@ -77,7 +77,7 @@ class Post(db.Model):
     posted_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     comments = db.relationship('Comment', backref='post', lazy=True)
-    likes = db.relationship('Like', backref='post', lazy=True)
+    likes = db.relationship('Likes', backref='post', lazy=True)
 
     def __repr__(self) -> str:
         return f'Post>>>{self.id}'
@@ -93,16 +93,15 @@ class Comment(db.Model):
     def __repr__(self) -> str:
         return f'Comment>>>{self.id}'
 
-# Likes table
-class Like(db.Model):
-    __tablename__ = 'likes'
+# Likess table
+class Likes(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     post_id = db.Column(db.Integer, db.ForeignKey("post.id"))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self) -> str:
-        return f'Like>>>{self.id}'
+        return f'Likes>>>{self.id}'
 
 # Followers table
 class Follower(db.Model):

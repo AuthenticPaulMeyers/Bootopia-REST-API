@@ -1,5 +1,5 @@
 from flask import request, Blueprint, jsonify
-from ..schema.models import db, Post, Book, Like, Comment
+from ..schema.models import db, Post, Book, Likes, Comment
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from ..utils.image_upload import upload_image
@@ -11,11 +11,6 @@ user_posts = Blueprint('posts', __name__, static_url_path='static/', url_prefix=
 @user_posts.route('/')
 @jwt_required()
 def posts():
-
-    # pagination
-    page=request.args.get('page', 1, type=int)
-    per_page=request.args.get('per_page', 10, type=int)
-
     posts = Post.query.all()
 
     if not posts:
@@ -23,7 +18,7 @@ def posts():
 
     posts_data = []
     for post in posts:
-        likes_count = Like.query.filter_by(post_id=post.id).count()
+        likes_count = Likes.query.filter_by(post_id=post.id).count()
         comments = Comment.query.filter_by(post_id=post.id).all()
         comments_data = [
             {
@@ -46,7 +41,6 @@ def posts():
             'comments': comments_data
             
         })
-
     return jsonify({'posts': posts_data}), HTTP_200_OK
 
 # get user posts
