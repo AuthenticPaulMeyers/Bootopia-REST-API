@@ -5,7 +5,7 @@ from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTT
 from ..utils.image_upload import upload_image
 
 # create a blueprint for this route
-user_bookmarks = Blueprint('bookmark', __name__, static_url_path='static/', url_prefix='/bookmarks')
+user_bookmarks = Blueprint('bookmark', __name__, static_url_path='static/', url_prefix='/api/v1.0/bookmarks')
 
 # get all bookmarks
 @user_bookmarks.route('/')
