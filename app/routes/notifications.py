@@ -37,10 +37,11 @@ def read_notification(note_id):
 
     if not notification:
         return jsonify({'error': 'Notification not found.'}), HTTP_404_NOT_FOUND
-    
-    notification.is_read = True
-    db.session.commit()
-    
+    # mark notification as read
+    if notification.is_read == 'false' or notification.is_read == False:
+        notification.is_read = True
+        db.session.commit()
+        
     return jsonify({
         'notification':{
             'id': notification.id,
