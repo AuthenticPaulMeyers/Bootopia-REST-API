@@ -5,7 +5,7 @@ from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTT
 from ..utils.image_upload import upload_image
 
 # create a blueprint for this route
-user_posts = Blueprint('posts', __name__, static_url_path='static/', url_prefix='/posts')
+user_posts = Blueprint('posts', __name__, static_url_path='static/', url_prefix='/api/v1.0/posts')
 
 # get all posts
 @user_posts.route('/')
@@ -55,7 +55,7 @@ def get_posts_from_single_user(user_id):
 
     posts_data = []
     for post in posts:
-        likes_count = Like.query.filter_by(post_id=post.id).count()
+        likes_count = Likes.query.filter_by(post_id=post.id).count()
         comments = Comment.query.filter_by(post_id=post.id).all()
         comments_data = [
             {
@@ -78,11 +78,10 @@ def get_posts_from_single_user(user_id):
             'comments': comments_data
             
         })
-
     return jsonify({'posts': posts_data}), HTTP_200_OK
 
 # create a posts
-@user_posts.route('/new', methods=['POST', 'GET'])
+@user_posts.route('/new', methods=['POST'])
 @jwt_required()
 def create_post():
     userId = get_jwt_identity()
@@ -102,7 +101,7 @@ def create_post():
         # get the book ID
         book = Book.query.filter_by(title=book_title).first()
         if not book:
-            return jsonify({'error': 'Book not found.'}), HTTP_404_NOT_FOUND
+            return jsonify({'error': 'Book title not found.'}), HTTP_404_NOT_FOUND
         
         book_id = book.id
         
@@ -131,7 +130,7 @@ def create_post():
         }), HTTP_201_CREATED
     
 # get a specific post
-@user_posts.route('/<int:post_id>', methods=['POST', 'GET'])
+@user_posts.route('/<int:post_id>')
 @jwt_required()
 def get_post(post_id):
     post = Post.query.filter_by(id=post_id).first()
@@ -139,7 +138,7 @@ def get_post(post_id):
     if not post:
         return jsonify({'error': 'Post not found.'}), HTTP_404_NOT_FOUND
         
-    likes_count = Like.query.filter_by(post_id=post.id).count()
+    likes_count = Likes.query.filter_by(post_id=post.id).count()
     comments = Comment.query.filter_by(post_id=post.id).all()
 
     if not comments:
@@ -221,7 +220,7 @@ def update_post(post_id):
             return jsonify({'error': f'{HTTP_400_BAD_REQUEST} Bad request'}), HTTP_400_BAD_REQUEST
 
 # delete a specific post
-@user_posts.route('/delete/<int:post_id>', methods=['DELETE', 'GET'])
+@user_posts.route('/delete/<int:post_id>', methods=['DELETE'])
 @jwt_required()
 def delete_post(post_id):
     userId = get_jwt_identity()
@@ -233,8 +232,10 @@ def delete_post(post_id):
     
     if not post:
         return jsonify({'error': 'Post not available.'}), HTTP_404_NOT_FOUND
-    db.session.delete(post)
-    db.session.commit()
+    
+    if request.method == "DELETE":
+        db.session.delete(post)
+        db.session.commit()
 
-    return jsonify({'message': 'Post deleted!'}), HTTP_200_OK
+        return jsonify({'message': 'Post deleted!'}), HTTP_200_OK
 
