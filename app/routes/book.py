@@ -62,10 +62,9 @@ def add_new_book():
         if title == '' or author == '' or description == '':
             return jsonify({'error': 'Required fields cannot be null.'}), HTTP_400_BAD_REQUEST
         
-        if not description:
+        if not description or not title or not author:
             return jsonify({'error': 'Required fields cannot be null.'}), HTTP_400_BAD_REQUEST
             
-
         if not file or not cover:
             return jsonify({'error': 'No file provided.'}), HTTP_400_BAD_REQUEST
         
@@ -96,7 +95,6 @@ def add_new_book():
 @books.route("/get/<int:book_id>")
 @jwt_required()
 def get_book(book_id):
-
     # get user id
     userId = get_jwt_identity()
 
@@ -181,7 +179,7 @@ def update_book(book_id):
             if title == '' or author == '' or description == '':
                 return jsonify({'error': 'Required fields cannot be null.'}), HTTP_400_BAD_REQUEST
             
-            if not description:
+            if not description or not title or not author:
                 return jsonify({'error': 'Required fields cannot be null.'}), HTTP_400_BAD_REQUEST
                 
             if not file or not cover:
