@@ -7,7 +7,7 @@ from ..constants.http_status_codes import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_
 user_comments = Blueprint('comments', __name__, url_prefix='/api/v1.0/comments')
 
 # Comment a post
-@user_comments.route('/<int:post_id>/comment', methods=['POST', 'GET'])
+@user_comments.route('/<int:post_id>/comment', methods=['POST'])
 @jwt_required()
 def comment_post(post_id):
     userId = get_jwt_identity()
@@ -37,7 +37,6 @@ def comment_post(post_id):
 @user_comments.route('/post/<int:post_id>', methods=['GET'])
 @jwt_required()
 def get_comment_post(post_id):
-
     # get comments for the post (not just by the current user)
     comments = Comment.query.filter_by(post_id=post_id).all()
     comments_count = len(comments)
@@ -64,8 +63,9 @@ def delete_comment(comment_id):
     comment = Comment.query.filter_by(id=comment_id, user_id=userId).first()
 
     if not comment:
-        return jsonify({'error': 'Comment not found or not authorized.'}), HTTP_404_NOT_FOUND
+        return jsonify({'error': 'Comment not found.'}), HTTP_404_NOT_FOUND
 
-    db.session.delete(comment)
-    db.session.commit()
-    return jsonify({'message': 'Comment deleted.'}), HTTP_200_OK
+    if request.method == "DELETE":
+        db.session.delete(comment)
+        db.session.commit()
+        return jsonify({'message': 'Comment deleted.'}), HTTP_200_OK
