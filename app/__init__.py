@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
 import os
+from flask_cors import CORS
 from .schema.models import db
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
@@ -41,6 +42,7 @@ def create_app(test_config=None):
     JWTManager(app)
     # initialise migrations
     Migrate(app, db)
+    CORS(app)
 
     # configure blueprints here
     app.register_blueprint(recommender)

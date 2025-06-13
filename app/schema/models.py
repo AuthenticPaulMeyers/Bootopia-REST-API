@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
-
+from sqlalchemy import func
 # initialise the database
 db = SQLAlchemy()
 
@@ -27,6 +27,8 @@ class Users(db.Model):
     summaries = db.relationship('Summary', backref='users', lazy=True)
     quotes = db.relationship('Quote', backref='users', lazy=True)
     notifications = db.relationship('Notification', backref='users', lazy=True)
+    user_moods = db.relationship('UserMood', backref='users', lazy=True)
+    user_recommendations = db.relationship('UserRecommendation', backref='users', lazy=True)
 
     def __repr__(self) -> str:
         return f'Users>>>{self.id}'
@@ -50,6 +52,8 @@ class Book(db.Model):
     summaries = db.relationship('Summary', backref='book', lazy=True)
     quotes = db.relationship('Quote', backref='book', lazy=True)
     tags = db.relationship('BookTag', backref='book', lazy=True)
+    user_recommendations = db.relationship('UserRecommendation', backref='book', lazy=True)
+    book_moods = db.relationship('BookMood', backref='book', lazy=True)
 
     def __repr__(self) -> str:
         return f'Book>>>{self.id}'
@@ -78,6 +82,7 @@ class Post(db.Model):
     
     comments = db.relationship('Comment', backref='post', lazy=True)
     likes = db.relationship('Likes', backref='post', lazy=True)
+    posst_moods = db.relationship('PostMood', backref='post', lazy=True)
 
     def __repr__(self) -> str:
         return f'Post>>>{self.id}'
@@ -127,8 +132,8 @@ class Summary(db.Model):
 # Quotes table to store user saved quotes
 class Quote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    book_id = db.Column(db.Integer, db.ForeignKey("book.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
+    book_id = db.Column(db.Integer, db.ForeignKey("book.id", ondelete="CASCADE"))
     quote = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -157,10 +162,50 @@ class BookTag(db.Model):
 # Notifications table
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
     message = db.Column(db.Text, nullable=False)
     is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self) -> str:
         return f'Notification>>>{self.id}'
+    
+# Moods table
+class Mood(db.Model):
+    __tablename__ = "moods"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(40), unique=True, nullable=False)
+    user_moods = db.relationship('UserMood', backref='mood', lazy=True)
+    post_moods = db.relationship('PostMood', backref='mood', lazy=True)
+    book_moods = db.relationship('BookMood', backref='mood', lazy=True)
+
+# User mapping to moods table
+class UserMood(db.Model):
+    __tablename__ = "user_moods"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    mood_id = db.Column(db.ForeignKey("moods.id", ondelete="CASCADE"), index=True)
+    strength = db.Column(db.SmallInteger, default=1)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+# book mapping to mood
+class BookMood(db.Model):
+    __tablename__ = "book_moods"
+    id = db.Column(db.Integer, primary_key=True)
+    book_id = db.Column(db.ForeignKey("books.id", ondelete="CASCADE"), index=True)
+    mood_id = db.Column(db.ForeignKey("moods.id", ondelete="CASCADE"), index=True)
+
+# Post mood table | mapping posts with moods
+class PostMood(db.Model):
+    __tablename__ = "post_moods"
+    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.ForeignKey("posts.id", ondelete="CASCADE"), index=True)
+    mood_id = db.Column(db.ForeignKey("moods.id", ondelete="CASCADE"), index=True)
+
+# Recommendations with matching moods
+class UserRecommendation(db.Model):
+    __tablename__ = "user_recommendations"
+    id = db.Column(db.Integer, primary_key=True)
+    book_id = db.Column(db.ForeignKey("books.id", ondelete="CASCADE"), index=True)
+    user_id = db.Column(db.ForeignKey("users.id", ondelete="CASCADE"), index=True)
+
