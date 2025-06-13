@@ -27,13 +27,13 @@ def get_feeds():
     ).label("pop_score")
 
     # 2. Get the current user's following list
-    followed = db.query(Follower.following_id).filter(Follower.follower_id == user_id).subquery()
+    followed = db.session.query(Follower.following_id).filter(Follower.follower_id == user_id).subquery()
 
     # 3. get the current users active moods
-    active_moods = db.query(UserMood.mood_id).filter(UserMood.user_id == user_id).subquery()
+    active_moods = db.session.query(UserMood.mood_id).filter(UserMood.user_id == user_id).subquery()
 
     # 4. Get stored book recommendations
-    rec_books = db.query(UserRecommendation.book_id).filter(UserRecommendation.user_id == user_id).subquery()
+    rec_books = db.session.query(UserRecommendation.book_id).filter(UserRecommendation.user_id == user_id).subquery()
 
     feed_query = (
         db.session.query(Post)
@@ -53,15 +53,11 @@ def get_feeds():
 
     feed_results = feed_query.all()
 
-    if not feed_results:
-        return jsonify({"error": "Invalid request."}), HTTP_400_BAD_REQUEST
-    
     # Process results: extract Post objects and convert to dictionary
     posts = []
-    for post_obj, pop_score in feed_results:
+    for post_obj in feed_results:
         # Pass current_user_id to to_dict if needed for personalization
-        post_dict = post_obj.to_dict(current_user_id=user_id)
-        post_dict['popularity_score'] = pop_score # Add the calculated score
+        post_dict = post_obj.to_dict(user_id=user_id)
         posts.append(post_dict)
 
     if not posts or posts == "" or posts == []:

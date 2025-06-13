@@ -16,6 +16,7 @@ from .routes.user_books import user_bookmarks
 from .routes.quotes import user_quotes
 from .routes.tags import tag_bp
 from .routes.notifications import notification_bp
+from .routes.feed import feed_ap
 from flask_migrate import Migrate
 from .constants.http_status_codes import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_503_SERVICE_UNAVAILABLE
 
@@ -57,6 +58,7 @@ def create_app(test_config=None):
     app.register_blueprint(user_quotes)
     app.register_blueprint(tag_bp)
     app.register_blueprint(notification_bp)
+    app.register_blueprint(feed_ap)
     
     
     # exception handling

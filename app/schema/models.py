@@ -86,6 +86,18 @@ class Post(db.Model):
 
     def __repr__(self) -> str:
         return f'Post>>>{self.id}'
+    
+    def to_dict(self, user_id=None):
+        return {
+            'id': self.id,
+            'posted_by': self.users.username,
+            'content': self.content,
+            'title': self.title,
+            'post_image_url': self.post_image_url,
+            'posted_at': self.posted_at.isoformat(),
+            'book_title': self.book.title,
+        }
+
 
 # Comments table
 class Comment(db.Model):
@@ -179,6 +191,9 @@ class Mood(db.Model):
     post_moods = db.relationship('PostMood', backref='mood', lazy=True)
     book_moods = db.relationship('BookMood', backref='mood', lazy=True)
 
+    def __repr__(self) -> str:
+        return f'Mood>>>{self.id}'
+
 # User mapping to moods table
 class UserMood(db.Model):
     __tablename__ = "user_moods"
@@ -188,24 +203,36 @@ class UserMood(db.Model):
     strength = db.Column(db.SmallInteger, default=1)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    def __repr__(self) -> str:
+        return f'UserMood>>>{self.id}'
+
 # book mapping to mood
 class BookMood(db.Model):
     __tablename__ = "book_moods"
     id = db.Column(db.Integer, primary_key=True)
-    book_id = db.Column(db.ForeignKey("books.id", ondelete="CASCADE"), index=True)
+    book_id = db.Column(db.ForeignKey("book.id", ondelete="CASCADE"), index=True)
     mood_id = db.Column(db.ForeignKey("moods.id", ondelete="CASCADE"), index=True)
+
+    def __repr__(self) -> str:
+        return f'BookMood>>>{self.id}'
 
 # Post mood table | mapping posts with moods
 class PostMood(db.Model):
     __tablename__ = "post_moods"
     id = db.Column(db.Integer, primary_key=True)
-    post_id = db.Column(db.ForeignKey("posts.id", ondelete="CASCADE"), index=True)
+    post_id = db.Column(db.ForeignKey("post.id", ondelete="CASCADE"), index=True)
     mood_id = db.Column(db.ForeignKey("moods.id", ondelete="CASCADE"), index=True)
+
+    def __repr__(self) -> str:
+        return f'PostMood>>>{self.id}'
 
 # Recommendations with matching moods
 class UserRecommendation(db.Model):
     __tablename__ = "user_recommendations"
     id = db.Column(db.Integer, primary_key=True)
-    book_id = db.Column(db.ForeignKey("books.id", ondelete="CASCADE"), index=True)
+    book_id = db.Column(db.ForeignKey("book.id", ondelete="CASCADE"), index=True)
     user_id = db.Column(db.ForeignKey("users.id", ondelete="CASCADE"), index=True)
+
+    def __repr__(self) -> str:
+        return f'UserRecommendation>>>{self.id}'
 
