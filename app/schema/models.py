@@ -45,8 +45,8 @@ class Book(db.Model):
     isbn = db.Column(db.String(255))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
-    
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
+
     user_books = db.relationship('UserBook', backref='book', lazy=True)
     posts = db.relationship('Post', backref='book', lazy=True)
     summaries = db.relationship('Summary', backref='book', lazy=True)
@@ -61,8 +61,8 @@ class Book(db.Model):
 # UserBook/Bookmark/Favourites/Reading list table to track the books the user is reading
 class UserBook(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    book_id = db.Column(db.Integer, db.ForeignKey("book.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
+    book_id = db.Column(db.Integer, db.ForeignKey("book.id", ondelete="CASCADE"))
     status = db.Column(db.String(20), default='want_to_read')
     personal_note = db.Column(db.Text)
     added_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -73,8 +73,8 @@ class UserBook(db.Model):
 # Posts table
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    book_id = db.Column(db.Integer, db.ForeignKey("book.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
+    book_id = db.Column(db.Integer, db.ForeignKey("book.id", ondelete="CASCADE"))
     content = db.Column(db.Text, nullable=False)
     title = db.Column(db.String(255), nullable=False)
     post_image_url = db.Column(db.Text, nullable=True)
@@ -97,7 +97,6 @@ class Post(db.Model):
             'posted_at': self.posted_at.isoformat(),
             'book_title': self.book.title,
         }
-
 
 # Comments table
 class Comment(db.Model):
@@ -133,7 +132,7 @@ class Follower(db.Model):
 # Summaries table to store AI generated summaries
 class Summary(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
     book_id = db.Column(db.Integer, db.ForeignKey("book.id"))
     summary_text = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
