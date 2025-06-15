@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from ..schema.models import db, Users
 from flask_jwt_extended import jwt_required, create_refresh_token, get_jwt_identity, create_access_token
 from ..utils.image_upload import upload_image
-from ..constants.http_status_codes import HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT, HTTP_200_OK
+from ..constants.http_status_codes import HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT, HTTP_200_OK, HTTP_404_NOT_FOUND
 import validators
 
 # create a blueprint for this route
@@ -116,6 +116,30 @@ def current_user_profile():
         }), HTTP_200_OK
     else:
         return jsonify({'error': HTTP_400_BAD_REQUEST}), HTTP_400_BAD_REQUEST
+
+# reset user password
+@auth.route('/reset-password', methods=['POST'])
+def reset_password():
+    user_email = request.json.get("email")
+    user = Users.query.filter_by(email=user_email).first()
+    if not user_email:
+        return {"error": "Email is required."}, HTTP_400_BAD_REQUEST
+    
+    if not validators.email(user_email):
+        return {"error": "Email is not valid."}, HTTP_400_BAD_REQUEST
+    
+    new_password = request.json.get("new_password")
+
+    if not new_password:
+        return {"error": "New password is required."}, HTTP_400_BAD_REQUEST
+
+    if not user:
+        return {"error": "User not found."}, HTTP_404_NOT_FOUND
+
+    user.password_hash = generate_password_hash(new_password)
+    db.session.commit()
+
+    return {"message": "Password reset successfully."}, HTTP_200_OK
 
 # create user refresh token
 @auth.get("/token/refresh")
