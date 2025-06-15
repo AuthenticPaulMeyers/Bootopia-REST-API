@@ -1,7 +1,7 @@
-from flask import Blueprint, request, jsonify
-from ..schema.models import db, Book, Post, Likes, PostMood, BookMood, UserMood, Comment, Follower, UserRecommendation
+from flask import Blueprint, jsonify
+from ..schema.models import db, Post, Likes, PostMood, UserMood, Comment, Follower, UserRecommendation
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_201_CREATED
+from ..constants.http_status_codes import HTTP_200_OK
 from sqlalchemy import func, or_
 
 feed_bp = Blueprint('feeds', __name__, static_url_path="/static", url_prefix="/api/v1.0/feeds")
