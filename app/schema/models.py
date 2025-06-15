@@ -55,6 +55,21 @@ class Book(db.Model):
     user_recommendations = db.relationship('UserRecommendation', backref='book', lazy=True)
     book_moods = db.relationship('BookMood', backref='book', lazy=True)
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'author': self.author,
+            'description': self.description,
+            'cover_image_url': self.cover_image_url,
+            'file_url': self.file_url,
+            'year_published': self.year_published,
+            'isbn': self.isbn if self.isbn else None,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+            'user_id': self.users.username,
+        }
+
     def __repr__(self) -> str:
         return f'Book>>>{self.id}'
 

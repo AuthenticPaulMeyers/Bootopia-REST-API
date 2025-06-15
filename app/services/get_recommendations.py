@@ -27,13 +27,14 @@ def get_mood_recommendations(mood):
                     "reasoning": "reasoning for the books recommended based on the user mood",
                     "books": [
                         {
+                            'id': "unique identifier for the book. Should be a randint 4 digit number",
                             "title": "book title",
                             "author": "author of the book",
                             "description": "description of the book",
                             "file_url": "the book file url",
                             "genre": "the genre of the book",
                             "cover_image_url": "image cover link",
-                            "year_pusblished": "year of publication",
+                            "year_published": "year of publication",
                             "isbn": "the ISBN of the book (if any)"
                         }
                     ]
