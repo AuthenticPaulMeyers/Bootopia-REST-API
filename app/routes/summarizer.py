@@ -6,10 +6,12 @@ from ..schema.models import Book, Summary, db
 from ..utils.limit_tokens_count import truncate_text_to_token_limit
 from ..utils.downloads import download_or_get_local_file
 from ..utils.get_text_from_pdf import extract_text_content
+from app import limiter, get_remote_address
 
 summarize = Blueprint('summarize', __name__, static_folder='static', url_prefix='/api/v1.0/summarize')
 
 @summarize.route('/book/<int:book_id>', methods=['POST'])
+@limiter.limit("10 per day", key_func=get_remote_address)
 @jwt_required()
 def summarise_book(book_id):
     user_id = get_jwt_identity()
