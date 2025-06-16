@@ -127,7 +127,7 @@ def current_user_profile():
     else:
         return jsonify({'error': HTTP_400_BAD_REQUEST}), HTTP_400_BAD_REQUEST
 
-# reset user password
+# reset user password request route
 @auth.route('/reset-password-request', methods=['POST'])
 @limiter.limit("5 per hour", key_func=get_remote_address)
 def reset_password_request():
@@ -149,7 +149,7 @@ def reset_password_request():
         else:
             return {"error": "Failed to send reset email. Please try again later."}, HTTP_500_INTERNAL_SERVER_ERROR
 
-# reset user password
+# reset user password route
 @auth.route('/reset-password/<token>', methods=['POST'])
 @limiter.limit("5 per hour", key_func=get_remote_address)
 def reset_password(token):

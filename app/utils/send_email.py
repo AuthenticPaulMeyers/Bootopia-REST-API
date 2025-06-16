@@ -1,7 +1,7 @@
 # This module contains utility functions for generating and sending password reset tokens.
 from flask_mail import Message
 from app import mail 
-from flask import render_template, current_app as app
+from flask import current_app as app
 from flask import url_for
 def send_email(subject, sender, recipients, text_body):
     msg = Message(subject, sender=sender, recipients=recipients)
