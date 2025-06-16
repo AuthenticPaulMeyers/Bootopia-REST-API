@@ -3,9 +3,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from ..schema.models import db, Users
 from flask_jwt_extended import jwt_required, create_refresh_token, get_jwt_identity, create_access_token
 from ..utils.image_upload import upload_image
-from ..constants.http_status_codes import HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
+from ..constants.http_status_codes import HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT, HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR
 import validators
-from ..utils.send_email import send_reset_email
+from ..utils.send_email import send_password_reset_email
 from app import limiter, get_remote_address
 
 # create a blueprint for this route
@@ -20,7 +20,15 @@ def register():
         email = request.form.get('email')
         bio = request.form.get('bio')
         password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
 
+        # check if the passwords match
+        if password != confirm_password:
+            return jsonify({'error': 'Passwords do not match.'}), HTTP_400_BAD_REQUEST
+        
+        if len(password) < 8:
+            return jsonify({'error': 'Password must be at least 8 characters long.'}), HTTP_400_BAD_REQUEST
+        
         # validating the name 
         if len(username) < 3:
             return jsonify({'error': "Name is too short"}), HTTP_400_BAD_REQUEST
@@ -134,10 +142,9 @@ def reset_password_request():
     if request.method == 'POST':
         user = Users.query.filter_by(email=user_email).first()
 
-        if not user:
-            return {"error": "User not found."}, HTTP_404_NOT_FOUND
+        if user:
         # send reset email
-        if send_reset_email(user):
+            send_password_reset_email(user)
             return {"message": "An email has been sent with instructions to reset your password."}, HTTP_200_OK
         else:
             return {"error": "Failed to send reset email. Please try again later."}, HTTP_500_INTERNAL_SERVER_ERROR
@@ -146,21 +153,28 @@ def reset_password_request():
 @auth.route('/reset-password/<token>', methods=['POST'])
 @limiter.limit("5 per hour", key_func=get_remote_address)
 def reset_password(token):
-    user = Users.verify_reset_token(token)
-
+    
+    user = Users.verify_reset_password_token(token)
     if not user:
         return {"error": "Invalid or expired token."}, HTTP_400_BAD_REQUEST
     
-    new_password = request.json.get("password")
-    
-    if not new_password:
-        return {"error": "New password is required."}, HTTP_400_BAD_REQUEST
-    
-    # update the user password
-    user.password_hash = generate_password_hash(new_password)
-    db.session.commit()
+    if request.method =="POST":
+        new_password = request.json.get("password")
+        confirm_password = request.json.get("confirm-password")
+        # validate the new password and confirm password
+        if not new_password or not confirm_password or new_password == '' or confirm_password == '':
+            return {"error": "New password is required."}, HTTP_400_BAD_REQUEST
+        
+        if new_password != confirm_password:
+            return {"error": "Passwords do not match."}, HTTP_400_BAD_REQUEST
+        if len(new_password) < 8:
+            return {"error": "Password must be at least 8 characters long."}, HTTP_400_BAD_REQUEST
+        # update the user password
+        hashed_password = generate_password_hash(new_password)
+        user.password_hash = hashed_password
+        db.session.commit()
 
-    return {"message": "Your password has been updated successfully."}, HTTP_200_OK
+        return {"message": "Your password has been updated successfully."}, HTTP_200_OK
 
 # create user refresh token
 @auth.get("/token/refresh")

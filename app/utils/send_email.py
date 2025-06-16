@@ -1,24 +1,19 @@
 # This module contains utility functions for generating and sending password reset tokens.
-from flask import url_for, current_app
 from flask_mail import Message
 from app import mail 
+from flask import render_template, current_app as app
+from flask import url_for
+def send_email(subject, sender, recipients, text_body):
+    msg = Message(subject, sender=sender, recipients=recipients)
+    msg.body = text_body
+    # Send the email using Flask-Mail
+    mail.send(msg)
 
-def send_reset_email(user):
-    token = user.get_reset_token() # Generate the token
+def send_password_reset_email(user):
+    token = user.get_reset_password_token()
+    link = url_for('auth.reset_password', token=token, _external=True)
 
-    # Construct the reset link.
-    reset_link = url_for('auth.reset_token', token=token, _external=True)
-
-    # Create the email message
-    msg = Message('Password Reset Request',
-                  sender=current_app.config['MAIL_DEFAULT_SENDER'],
-                  recipients=[user.email])
-    msg.body = f'''To reset your password, visit the following link: {reset_link} If you did not make this request, please ignore this email.
-'''
-    # try to send the email
-    try:
-        mail.send(msg)
-        return True
-    except Exception as e:
-        current_app.logger.error(f"Failed to send password reset email to {user.email}: {e}")
-        return False
+    send_email('Password reset request',
+    sender=app.config['MAIL_USERNAME'],
+    recipients=[user.email],
+    text_body=f"Hello { user.username }, To reset your password please click on the following link: {link}. If you have not requested a password reset simply ignore this message. Sincerely, The Bootopia Support Team")

@@ -1,7 +1,8 @@
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
-from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
-from flask import current_app
+from flask import app, current_app
+from time import time
+import jwt
 # initialise the database
 db = SQLAlchemy()
 
@@ -34,27 +35,16 @@ class Users(db.Model):
     def __repr__(self) -> str:
         return f'Users>>>{self.id}'
     
-    def get_reset_token(self, expires_sec=1800): # Token valid for 30 minutes
-        s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
-        # The payload should uniquely identify the user. User ID is ideal.
-        return s.dumps({'user_id': self.id})
-
+    def get_reset_password_token(self, expires_in=3600):
+        return jwt.encode({'reset_password': self.id, 'exp': time() + expires_in}, current_app.config['SECRET_KEY'], algorithm='HS256')
+    
     @staticmethod
-    def verify_reset_token(token):
-        s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    def verify_reset_password_token(token):
         try:
-            # Load the token, checking for expiration
-            data = s.loads(token, max_age=1800) # Max age must match get_reset_token or be consistent
-            user_id = data.get('user_id')
-        except SignatureExpired:
-            return None # Token has expired
-        except BadTimeSignature:
-            return None # Invalid token (tampered or malformed)
-        except Exception: # Catch any other unexpected errors
-            return None
-        
-        # If token is valid, retrieve the user
-        return db.session.get(Users, user_id) # Use db.session.get for primary key lookup
+            id = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])['reset_password']
+        except:
+            return
+        return Users.query.get(id)
 
 # Books table
 class Book(db.Model):

@@ -8,7 +8,7 @@ from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 from flask_migrate import Migrate
 from .constants.http_status_codes import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_503_SERVICE_UNAVAILABLE, HTTP_429_TOO_MANY_REQUESTS
-from flask_mail import Mail, Message
+from flask_mail import Mail
 
 load_dotenv()
 
@@ -43,19 +43,20 @@ def create_app(test_config=None):
     JWTManager(app)
     # initialise migrations
     Migrate(app, db)
-    # initialise mail
-    mail.init_app(app)
+
     # CORS configuration
     CORS(app)
 
+    # Flask-Mail configuration
+    app.config['MAIL_SERVER']= os.getenv('MAIL_SERVER')
+    app.config['MAIL_PORT'] = os.getenv('MAIL_PORT')
+    app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+    app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+    app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS')
+    app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 
-    # Flask-Mail configuration (MANDATORY for email sending)
-    app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER')
-    app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT'))
-    app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS').lower() in ['true', 'on', '1']
-    app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME') 
-    app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
-    app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
+    # initialise mail
+    mail.init_app(app)
 
     # import blueprints
     from .routes.recommendations import recommender
