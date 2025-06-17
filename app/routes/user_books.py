@@ -2,7 +2,7 @@ from flask import request, Blueprint, jsonify
 from ..schema.models import db, UserBook
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
-from ..utils.image_upload import upload_image
+
 
 # create a blueprint for this route
 user_bookmarks = Blueprint('bookmark', __name__, static_url_path='static/', url_prefix='/api/v1.0/bookmarks')
@@ -28,7 +28,7 @@ def get_all_bookmarks():
             'book_author': bookmark.book.author,
             'book_description': bookmark.book.description,
             'book_file_url': bookmark.book.file_url,
-            'book_cover_image_url': bookmark.cover_image_url,
+            'book_cover_image_url': bookmark.book.cover_image_url,
         })
     return ({'bookmarks': bookmark_data}), HTTP_200_OK
 
@@ -47,7 +47,7 @@ def add_bookmarks(book_id):
         return None
 
 # Remove from bookmark
-@user_bookmarks.route('/<int:book_id>/remove', methods=['POST'])
+@user_bookmarks.route('/<int:book_id>/remove', methods=['DELETE'])
 @jwt_required()
 def delete_bookmarks(book_id):
     user_id = get_jwt_identity()
@@ -56,11 +56,29 @@ def delete_bookmarks(book_id):
     if not bookmark:
         return jsonify({'error': 'Bookmark not found.'}), HTTP_404_NOT_FOUND
     
-    if request.method == 'POST':
+    if request.method == 'DELETE':
 
         db.session.delete(bookmark)
         db.session.commit()
         return jsonify({'message': 'Successfully removed from bookmarks.'}), HTTP_200_OK
     else:
         return None
+    
+# Clear all bookmarks
+@user_bookmarks.route('/clear', methods=['DELETE'])
+@jwt_required()
+def clear_bookmarks():
+    user_id = get_jwt_identity()
+    
+    if request.method == 'DELETE':
+        bookmarks = UserBook.query.filter_by(user_id=user_id).all()
+
+        if not bookmarks:
+            return jsonify({'message': 'No bookmarks available.'}), HTTP_200_OK
+        
+        for bookmark in bookmarks:
+            db.session.delete(bookmark)
+        
+        db.session.commit()
+        return jsonify({'message': 'Bookmarks cleared successfully.'}), HTTP_204_NO_CONTENT
 

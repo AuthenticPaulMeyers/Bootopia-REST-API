@@ -1,7 +1,7 @@
 from flask import request, Blueprint, jsonify
 from ..schema.models import db, Comment, Notification, Post, Users
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from ..constants.http_status_codes import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED
+from ..constants.http_status_codes import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 
 # create a blueprint for this route
 user_comments = Blueprint('comments', __name__, url_prefix='/api/v1.0/comments')
@@ -20,6 +20,9 @@ def comment_post(post_id):
     
     if request.method == 'POST':
         content = request.json['content']
+
+        if not content or content.strip() == '':
+            return jsonify({'error': 'Content cannot be empty.'}), HTTP_400_BAD_REQUEST
 
         comment = Comment(content=content, user_id=userId, post_id=post_id)
         db.session.add(comment)

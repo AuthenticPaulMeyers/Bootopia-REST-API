@@ -20,7 +20,7 @@ def like_post(post_id):
     # Allow users to like a post
     existing_like = Likes.query.filter_by(user_id=userId, post_id=post_id).first()
     if existing_like:
-         # allow users to unlike a post
+         # allow users to unlike a post if the post alreaady exists
         db.session.delete(existing_like)
         db.session.commit()
         return jsonify({'message': 'Post unliked successfully.'}), HTTP_200_OK
