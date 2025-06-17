@@ -11,8 +11,8 @@ db = SQLAlchemy()
 # Users table
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(32), nullable=False, unique=True)
-    email = db.Column(db.String(90), nullable=False, unique=True)
+    username = db.Column(db.String(32), nullable=False, unique=True, index=True)
+    email = db.Column(db.String(90), nullable=False, unique=True, index=True)
     bio = db.Column(db.Text, nullable=True)
     password_hash = db.Column(db.Text, nullable=False)
     profile_pic_url = db.Column(db.Text, nullable=True)
@@ -58,7 +58,7 @@ class Book(db.Model):
     isbn = db.Column(db.String(255))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), index=True)
 
     user_books = db.relationship('UserBook', backref='book', lazy=True)
     posts = db.relationship('Post', backref='book', lazy=True)
@@ -89,8 +89,8 @@ class Book(db.Model):
 # UserBook/Bookmark/Favourites/Reading list table to track the books the user is reading
 class UserBook(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
-    book_id = db.Column(db.Integer, db.ForeignKey("book.id", ondelete="CASCADE"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    book_id = db.Column(db.Integer, db.ForeignKey("book.id", ondelete="CASCADE"), index=True)
     status = db.Column(db.String(20), default='want_to_read')
     personal_note = db.Column(db.Text)
     added_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -101,8 +101,8 @@ class UserBook(db.Model):
 # Posts table
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
-    book_id = db.Column(db.Integer, db.ForeignKey("book.id", ondelete="CASCADE"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    book_id = db.Column(db.Integer, db.ForeignKey("book.id", ondelete="CASCADE"), index=True)
     content = db.Column(db.Text, nullable=False)
     title = db.Column(db.String(255), nullable=False)
     post_image_url = db.Column(db.Text, nullable=True)
@@ -129,8 +129,8 @@ class Post(db.Model):
 # Comments table
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    post_id = db.Column(db.Integer, db.ForeignKey("post.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), index=True)
+    post_id = db.Column(db.Integer, db.ForeignKey("post.id"), index=True)
     content = db.Column(db.Text, nullable=False)
     posted_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -140,8 +140,8 @@ class Comment(db.Model):
 # Likess table
 class Likes(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    post_id = db.Column(db.Integer, db.ForeignKey("post.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), index=True)
+    post_id = db.Column(db.Integer, db.ForeignKey("post.id"), index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self) -> str:
@@ -150,8 +150,8 @@ class Likes(db.Model):
 # Followers table
 class Follower(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    follower_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    following_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    follower_id = db.Column(db.Integer, db.ForeignKey("users.id"), index=True)
+    following_id = db.Column(db.Integer, db.ForeignKey("users.id"), index=True)
     followed_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self) -> str:
@@ -160,8 +160,8 @@ class Follower(db.Model):
 # Summaries table to store AI generated summaries
 class Summary(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
-    book_id = db.Column(db.Integer, db.ForeignKey("book.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    book_id = db.Column(db.Integer, db.ForeignKey("book.id"), index=True)
     summary_text = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -171,8 +171,8 @@ class Summary(db.Model):
 # Quotes table to store user saved quotes
 class Quote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
-    book_id = db.Column(db.Integer, db.ForeignKey("book.id", ondelete="CASCADE"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    book_id = db.Column(db.Integer, db.ForeignKey("book.id", ondelete="CASCADE"), index=True)
     quote = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -191,8 +191,8 @@ class Tag(db.Model):
 # BookTags table
 class BookTag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    book_id = db.Column(db.Integer, db.ForeignKey("book.id"))
-    tag_id = db.Column(db.Integer, db.ForeignKey("tag.id"))
+    book_id = db.Column(db.Integer, db.ForeignKey("book.id"), index=True)
+    tag_id = db.Column(db.Integer, db.ForeignKey("tag.id"), index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self) -> str:
@@ -201,7 +201,7 @@ class BookTag(db.Model):
 # Notifications table
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), index=True)
     message = db.Column(db.Text, nullable=False)
     is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -226,7 +226,7 @@ class UserMood(db.Model):
     __tablename__ = "user_moods"
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    mood_id = db.Column(db.ForeignKey("moods.id", ondelete="CASCADE"), index=True)
+    mood_id = db.Column(db.Integer, db.ForeignKey("moods.id", ondelete="CASCADE"), index=True)
     strength = db.Column(db.SmallInteger, default=1)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
