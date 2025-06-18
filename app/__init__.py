@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 import os
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -9,8 +9,19 @@ from dotenv import load_dotenv
 from flask_migrate import Migrate
 from .constants.http_status_codes import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_503_SERVICE_UNAVAILABLE, HTTP_429_TOO_MANY_REQUESTS
 from flask_mail import Mail
+from flask_swagger_ui import get_swaggerui_blueprint
 
 load_dotenv()
+
+# swagger ui setup
+SWAGGER_URL = '/docs'
+API_URL = '/static/swagger.yaml'
+
+swaggerui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={'app_name': "Book API with YAML"}
+)
 
 mail = Mail()
 
@@ -87,8 +98,16 @@ def create_app(test_config=None):
     app.register_blueprint(tag_bp)
     app.register_blueprint(notification_bp)
     app.register_blueprint(feed_bp)
-    
-    
+
+    # initialise swagger ui blueprint
+    app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
+
+    # Serve the Swagger YAML file
+    @app.route('/static/swagger.yaml')
+    def send_swagger():
+        return send_from_directory('static', 'swagger.yaml')
+
+
     # exception handling
     @app.errorhandler(HTTP_404_NOT_FOUND)
     def handle_file_not_found(error):

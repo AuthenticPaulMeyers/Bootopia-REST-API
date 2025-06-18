@@ -1,0 +1,125 @@
+swagger: "2.0"
+info:
+  title: Book API
+  description: A social network for reading and sharing books.
+  version: "1.0.0"
+basePath: /api
+schemes:
+  - http
+paths:
+  /books:
+    get:
+      summary: Get all books
+      responses:
+        200:
+          description: A list of books
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Book"
+  /books/new:
+    post:
+      summary: Create a new book
+      parameters:
+        - in: body
+          name: book
+          description: The book to create
+          required: true
+          schema:
+            $ref: "#/definitions/Book"
+      responses:
+        201:
+          description: Book created successfully
+        400:
+          description: Invalid input
+        500:
+          description: Internal server error
+  /books/get/{id}:
+    get:
+      summary: Get a book by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          type: string
+          description: The ID of the book to retrieve
+      responses:
+        200:
+          description: A book object
+          schema:
+            $ref: "#/definitions/Book"
+        404:
+          description: Book not found
+        500:
+          description: Internal server error
+  /books/update/{id}:
+    put:
+      summary: Update a book by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          type: string
+          description: The ID of the book to update
+        - in: body
+          name: book
+          description: The updated book object
+          required: true
+          schema:
+            $ref: "#/definitions/Book"
+      responses:
+        200:
+          description: Book updated successfully
+        400:
+          description: Invalid input
+        404:
+          description: Book not found
+        500:
+          description: Internal server error
+  /books/delete/{id}:
+    delete:
+      summary: Delete a book by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          type: string
+          description: The ID of the book to delete
+      responses:
+        204:
+          description: Book deleted successfully
+        404:
+          description: Book not found
+        500:
+          description: Internal server error
+  /books/search:
+    get:
+      summary: Search for books based on author or book title
+      parameters:
+        - in: query
+          name: query
+          required: true
+          type: string
+          description: The search term to use
+      responses:
+        200:
+          description: A list of books matching the search term
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Book"
+        400:
+          description: Invalid search term
+        500:
+          description: Internal server error
+definitions:
+  Book:
+    type: object
+    required:
+      - title
+      - author
+    properties:
+      title:
+        type: string
+      author:
+        type: string
