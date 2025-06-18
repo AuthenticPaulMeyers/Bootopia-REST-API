@@ -7,6 +7,23 @@ basePath: /api
 schemes:
   - http
 paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      parameters:
+        - in: body
+          name: user
+          description: The user to register
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        201:
+          description: User registered successfully
+        400:
+          description: Invalid input
+        500:
+          description: Internal server error
   /books:
     get:
       summary: Get all books
@@ -118,8 +135,218 @@ definitions:
     required:
       - title
       - author
+      - description
+      - cover_image_url
+      - file_url
+      - year_published
+      - isbn
+      - user_id
     properties:
       title:
         type: string
       author:
         type: string
+      description:
+        type: string
+      cover_image_url:
+        type: string
+      file_url:
+        type: string
+      year_published:
+        type: integer
+      isbn:
+        type: string
+      user_id:
+        type: integer
+  User:
+    type: object
+    required:
+      - email
+      - username
+      - password
+      - profile_picture_url
+      - bio
+    properties:
+      email:
+        type: string
+      username:
+        type: string
+      password:
+        type: string
+      profile_picture_url:
+        type: string
+      bio:
+        type: string
+  UserBook:
+    type: object
+    required:
+      - user_id
+      - book_id
+      - status
+      - personal_note
+    properties:
+      user_id:
+        type: integer
+      book_id:
+        type: integer
+      status:
+        type: string
+        enum: [reading, completed, want_to_read]
+      personal_note:
+        type: string
+  Post:
+    type: object
+    required:
+      - user_id
+      - book_id
+      - title
+      - post_image_url
+      - content
+      - timestamp
+    properties:
+      user_id:
+        type: integer
+      book_id:
+        type: integer
+      title:
+        type: string
+      post_image_url:
+        type: string
+      content:
+        type: string
+  Comment:
+    type: object
+    required:
+      - user_id
+      - post_id
+      - content
+    properties:
+      user_id:
+        type: integer
+      post_id:
+        type: integer
+      content:
+        type: string
+  Like:
+    type: object
+    required:
+      - user_id
+      - post_id
+    properties:
+      user_id:
+        type: integer
+      post_id:
+        type: integer
+  Follower:
+    type: object
+    required:
+      - follower_id
+      - followed_id
+    properties:
+      follower_id:
+        type: integer
+      followed_id:
+        type: integer
+  Notification:
+    type: object
+    required:
+      - user_id
+      - is_read
+      - message
+    properties:
+      user_id:
+        type: integer
+      message:
+        type: string
+      is_read:
+        type: boolean
+  Summary:
+    type: object
+    required:
+      - book_id
+      - summary_text
+      - user_id
+    properties:
+      book_id:
+        type: integer
+      summary_text:
+        type: string
+      user_id:
+        type: integer
+  Quote:
+    type: object
+    required:
+      - book_id
+      - quote
+      - user_id
+    properties:
+      book_id:
+        type: integer
+      quote:
+        type: string
+      user_id:
+        type: integer
+  Tag:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+  BookTag:
+    type: object
+    required:
+      - book_id
+      - tag_id
+    properties:
+      book_id:
+        type: integer
+      tag_id:
+        type: integer
+  Mood:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+  BookMood:
+    type: object
+    required:
+      - book_id
+      - mood_id
+    properties:
+      book_id:
+        type: integer
+      mood_id:
+        type: integer
+  UserMood:
+    type: object
+    required:
+      - user_id
+      - mood_id
+    properties:
+      user_id:
+        type: integer
+      mood_id:
+        type: integer
+  PostMood:
+    type: object
+    required:
+      - post_id
+      - mood_id
+    properties:
+      post_id:
+        type: integer
+      mood_id:
+        type: integer
+  UserRecommendation:
+    type: object
+    required:
+      - user_id
+      - book_id
+    properties:
+      user_id:
+        type: integer
+      book_id:
+        type: integer
