@@ -9,6 +9,7 @@ books = Blueprint("books", __name__, static_url_path="static/", url_prefix="/api
 
 # Get books route
 @books.route("/", methods=['POST', 'GET'])
+@jwt_required()
 def get_all_books():
 
     # add pagination

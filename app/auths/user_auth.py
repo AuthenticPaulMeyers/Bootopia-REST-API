@@ -9,7 +9,7 @@ from ..utils.send_email import send_password_reset_email
 from app import limiter, get_remote_address
 
 # create a blueprint for this route
-auth = Blueprint('auth', __name__, static_url_path='static/', url_prefix='/auth')
+auth = Blueprint('auth', __name__, static_url_path='static/', url_prefix='/api/v1.0/auth')
 
 # register route
 @auth.route('/register', methods=['POST', 'GET'])

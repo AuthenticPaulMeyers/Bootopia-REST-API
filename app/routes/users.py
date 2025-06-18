@@ -38,6 +38,7 @@ def follow_user(user_id):
 
 # unfollow a user route
 @user_follow.route('/<int:following_user_id>/unfollow', methods=['POST'])
+@jwt_required()
 def unfollow_user(following_user_id):
     current_user_id = get_jwt_identity()
     if current_user_id == following_user_id:
@@ -56,15 +57,15 @@ def unfollow_user(following_user_id):
 
     return {"message": f"Successfully unfollowed {unfollow.username}."}, HTTP_201_CREATED
 
-
 # get user's followers route
 @user_follow.route('/<int:user_id>/followers', methods=['GET'])
+@jwt_required()
 def get_followers(user_id):
     user = Users.query.get(user_id)
     if not user:
         return jsonify({'error': 'User not found.'}), HTTP_404_NOT_FOUND
 
-    followers = Follower.query.filter_by(followed_id=user_id).all()
+    followers = Follower.query.filter_by(following_id=user_id).all()
     follower_list = [
         {
             "id": follower.follower.id,
@@ -77,7 +78,9 @@ def get_followers(user_id):
 
 # get user's following route
 @user_follow.route('/<int:user_id>/following', methods=['GET'])
+@jwt_required()
 def get_user_following(user_id):
+
     user = Users.query.get(user_id)
     if not user:
         return jsonify({'error': 'User not found.'}), HTTP_404_NOT_FOUND
@@ -92,3 +95,26 @@ def get_user_following(user_id):
     ]
 
     return jsonify({"following": following_list}), HTTP_200_OK
+
+# get the user's profile
+@user_follow.route('/<int:user_id>/profile', methods=['GET'])
+@jwt_required()
+def get_user_profile(user_id):
+    user = Users.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found.'}), HTTP_404_NOT_FOUND
+
+    user_profile = {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "bio": user.bio,
+        "followers": len(user.followers),
+        "following": len(user.following),
+        "posts": len(user.posts),
+        "profile_image_url": user.profile_pic_url,
+        "books": len(user.books),
+        "joined_at": user.created_at
+    }
+
+    return jsonify({"profile": user_profile}), HTTP_200_OK
