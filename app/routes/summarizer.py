@@ -8,9 +8,9 @@ from ..utils.downloads import download_or_get_local_file
 from ..utils.get_text_from_pdf import extract_text_content
 from app import limiter, get_remote_address
 
-summarize = Blueprint('summarize', __name__, static_folder='static', url_prefix='/api/v1.0/summarize')
+summarize = Blueprint('summaries', __name__, static_folder='static', url_prefix='/api/v1.0/summaries')
 
-@summarize.route('/book/<int:book_id>', methods=['POST'])
+@summarize.route('/book/<int:book_id>/summarize', methods=['POST'])
 @limiter.limit("10 per day", key_func=get_remote_address)
 @jwt_required()
 def summarise_book(book_id):
@@ -91,3 +91,40 @@ def get_all_summaries(book_id):
         })
     return ({'summaries': summary_data}), HTTP_200_OK
 
+# delete a summary
+@summarize.route('/summary/<int:summary_id>/delete', methods=['DELETE'])
+@jwt_required()
+def delete_summary(summary_id):
+    user_id = get_jwt_identity()
+
+    summary = Summary.query.filter_by(user_id=user_id, id=summary_id).first()
+
+    if not summary:
+        return jsonify({'error': 'Summary not found.'}), HTTP_404_NOT_FOUND
+    
+    db.session.delete(summary)
+    db.session.commit()
+
+    return jsonify({'message': 'Summary deleted successfully.'}), HTTP_200_OK
+
+# Get all summaries for a user
+@summarize.route('/', methods=['GET'])
+@jwt_required()
+def get_user_summaries():
+    user_id = get_jwt_identity()
+
+    summaries = Summary.query.filter_by(user_id=user_id).all()
+
+    if not summaries:
+        return jsonify({'error': 'No summaries found.'}), HTTP_404_NOT_FOUND
+
+    summary_data = []
+
+    for summary in summaries:
+        summary_data.append({
+            'book': summary.book.title,
+            'author': summary.book.author,
+            'summary_text': summary.summary_text
+        })
+
+    return jsonify({'summaries': summary_data}), HTTP_200_OK

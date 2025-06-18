@@ -7,7 +7,7 @@ from ..constants.http_status_codes import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_
 user_comments = Blueprint('comments', __name__, url_prefix='/api/v1.0/comments')
 
 # Comment a post
-@user_comments.route('/<int:post_id>/comment', methods=['POST'])
+@user_comments.route('/<int:post_id>/new', methods=['POST'])
 @jwt_required()
 def comment_post(post_id):
     userId = get_jwt_identity()

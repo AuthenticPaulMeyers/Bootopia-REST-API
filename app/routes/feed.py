@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..constants.http_status_codes import HTTP_200_OK
 from sqlalchemy import func, or_
 
-feed_bp = Blueprint('feeds', __name__, static_url_path="/static", url_prefix="/api/v1.0/feeds")
+feed_bp = Blueprint('feeds', __name__, static_url_path="/static", url_prefix="/api/v1.0/feed")
 
 """
     Get feeds based on user recommendations

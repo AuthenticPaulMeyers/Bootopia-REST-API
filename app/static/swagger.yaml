@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  title: Book API
+  title: Bootopia API
   description: A social network for reading and sharing books.
   version: "1.0"
 basePath: /api/v1.0
@@ -13,6 +13,25 @@ tags:
     description: User Management
   - name: Books
     description: CRUD for books
+  - name: Posts
+    description: CRUD for posts
+  - name: Comments
+    description: CRUD for comments on posts
+  - name: Likes
+    description: CRUD for likes on posts
+  - name: Summary
+    description: CRUD for book summaries
+  - name: Quotes
+    description: CRUD for quotes from books
+  - name: Tags
+    description: CRUD for tags associated with books
+  - name: Recommendations
+    description: User recommendations for books
+  - name: Notifications
+    description: User notifications for activities
+  - name: Bookmarks
+    description: User bookmarks for books
+  
 
 securityDefinitions:
   Bearer:
@@ -380,6 +399,696 @@ paths:
             $ref: "#/definitions/User"
         404:
           description: User not found
+        500:
+          description: Internal server error
+  # Posts
+  /posts:
+    get:
+      tags:
+        - Posts
+      summary: Get all posts
+      responses:
+        200:
+          description: A list of posts
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Post"
+  /posts/new:
+    post:
+      tags:
+        - Posts
+      summary: Create a new post
+      parameters:
+        - in: body
+          name: post
+          description: The post to create
+          required: true
+          schema:
+            $ref: "#/definitions/Post"
+      responses:
+        201:
+          description: Post created successfully
+        400:
+          description: Invalid input
+        500:
+          description: Internal server error
+  /posts/get/{id}:
+    get:
+      tags:
+        - Posts
+      summary: Get a post by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          type: integer
+          description: The ID of the post to retrieve
+      responses:
+        200:
+          description: A post object
+          schema:
+            $ref: "#/definitions/Post"
+        404:
+          description: Post not found
+        500:
+          description: Internal server error
+  /posts/update/{id}:
+    put:
+      tags:
+        - Posts
+      summary: Update a post by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          type: integer
+          description: The ID of the post to update
+        - in: body
+          name: post
+          description: The updated post object
+          required: true
+          schema:
+            $ref: "#/definitions/Post"
+      responses:
+        200:
+          description: Post updated successfully
+        400:
+          description: Invalid input
+        404:
+          description: Post not found
+        500:
+          description: Internal server error
+  /posts/delete/{id}:
+    delete:
+      tags:
+        - Posts
+      summary: Delete a post by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          type: integer
+          description: The ID of the post to delete
+      responses:
+        204:
+          description: Post deleted successfully
+        404:
+          description: Post not found
+        500:
+          description: Internal server error
+  /posts/user/{user_id}:
+    get:
+      tags:
+        - Posts
+      summary: Get all posts by a specific user
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          type: integer
+          description: The ID of the user whose posts to retrieve
+      responses:
+        200:
+          description: A list of posts by the user
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Post"
+        404:
+          description: User not found or no posts available
+        500:
+          description: Internal server error
+  # Comments
+  /comments/post/{post_id}:
+    get:
+      tags:
+        - Comments
+      summary: Get comments for a specific post
+      parameters:
+        - in: path
+          name: post_id
+          required: true
+          type: integer
+          description: The ID of the post to retrieve comments for
+      responses:
+        200:
+          description: A list of comments for the post
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Comment"
+        404:
+          description: Post not found or no comments available
+        500:
+          description: Internal server error
+  /comments/{post_id}/new:
+    post:
+      tags:
+        - Comments
+      summary: Add a new comment to a specific post
+      parameters:
+        - in: path
+          name: post_id
+          required: true
+          type: integer
+          description: The ID of the post to add a comment to
+        - in: body
+          name: comment
+          description: The comment to add
+          required: true
+          schema:
+            $ref: "#/definitions/Comment"
+      responses:
+        201:
+          description: Comment added successfully
+        400:
+          description: Invalid input
+        404:
+          description: Post not found
+        500:
+          description: Internal server error
+  /comments/{comment_id}/delete:
+    delete:
+      tags:
+        - Comments
+      summary: Delete a comment by ID
+      parameters:
+        - in: path
+          name: comment_id
+          required: true
+          type: integer
+          description: The ID of the comment to delete
+      responses:
+        204:
+          description: Comment deleted successfully
+        404:
+          description: Comment not found
+        500:
+          description: Internal server error
+  # Likes
+  /likes/{post_id}/like:
+    post:
+      tags:
+        - Likes
+      summary: Like and unlike a post.
+      description: This endpoint toggles the like status of a post. If the user has already liked the post, it will remove the like; otherwise, it will add a like.
+      parameters:
+        - in: path
+          name: post_id
+          required: true
+          type: integer
+          description: The ID of the post to like
+      responses:
+        200:
+          description: Post liked successfully
+        404:
+          description: Post not found
+        500:
+          description: Internal server error
+  # Feed
+  /feed:
+    get:
+      tags:
+        - Posts
+      summary: Get the user's feed
+      description: Retrieve a list of posts from users that the current user is following.
+      responses:
+        200:
+          description: A list of posts in the user's feed
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Post"
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+  # Notifications
+  /notifications:
+    get:
+      tags:
+        - Notifications
+      summary: Get all notifications for the current user
+      responses:
+        200:
+          description: A list of notifications
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Notification"
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+  /notifications/mark-read:
+    post:
+      tags:
+        - Notifications
+      summary: Mark all notifications as read
+      responses:
+        200:
+          description: All notifications marked as read successfully
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+  /notifications/{notification_id}/read:
+    get:
+      tags:
+        - Notifications
+      summary: Mark a specific notification as read
+      parameters:
+        - in: path
+          name: notification_id
+          required: true
+          type: integer
+          description: The ID of the notification to mark as read
+      responses:
+        200:
+          description: Notification marked as read successfully
+        404:
+          description: Notification not found
+        500:
+          description: Internal server error
+  /notifications/{notification_id}/delete:
+    delete:
+      tags:
+        - Notifications
+      summary: Delete a specific notification
+      parameters:
+        - in: path
+          name: notification_id
+          required: true
+          type: integer
+          description: The ID of the notification to delete
+      responses:
+        204:
+          description: Notification deleted successfully
+        404:
+          description: Notification not found
+        500:
+          description: Internal server error
+  # Summaries
+  /summaries:
+    get:
+      tags:
+        - Summary
+      summary: Get all book summaries
+      responses:
+        200:
+          description: A list of book summaries
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Summary"
+  /summaries/book/{book_id}/summarize:
+    post:
+      tags:
+        - Summary
+      summary: Summaries a book
+      description: Create a summary for a specific book.
+      parameters:
+        - in: path
+          name: book_id
+          required: true
+          type: integer
+          description: The ID of the book to create the summary for
+      responses:
+        200:
+          description: A book summary object
+          schema:
+            $ref: "#/definitions/Summary"
+        404:
+          description: Book not found
+        500:
+          description: Internal server error
+  /summaries/summary/{summary_id}:
+    get:
+      tags:
+        - Summary
+      summary: Get a specific book summary by ID
+      parameters:
+        - in: path
+          name: summary_id
+          required: true
+          type: integer
+          description: The ID of the summary to retrieve
+      responses:
+        200:
+          description: A book summary object
+          schema:
+            $ref: "#/definitions/Summary"
+        404:
+          description: Summary not found
+        500:
+          description: Internal server error
+  /summaries/summary/{summary_id}/delete:
+    delete:
+      tags:
+        - Summary
+      summary: Delete a specific book summary by ID
+      parameters:
+        - in: path
+          name: summary_id
+          required: true
+          type: integer
+          description: The ID of the summary to delete
+      responses:
+        204:
+          description: Summary deleted successfully
+        404:
+          description: Summary not found
+        500:
+          description: Internal server error
+  /summaries/book/{book_id}/all:
+    get:
+      tags:
+        - Summary
+      summary: Get all summaries for a specific book
+      parameters:
+        - in: path
+          name: book_id
+          required: true
+          type: integer
+          description: The ID of the book to retrieve summaries for
+      responses:
+        200:
+          description: A list of summaries for the book
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Summary"
+        404:
+          description: Book not found or no summaries available
+        500:
+          description: Internal server error
+  # Recommendations
+  /recommendations:
+    get:
+      tags:
+        - Recommendations
+      summary: Get book recommendations for the current user
+      responses:
+        200:
+          description: A list of recommended books
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/UserRecommendation"
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+  /recommendations/mood_id:
+    get:
+      tags:
+        - Recommendations
+      summary: Get book recommendations based on mood
+      parameters:
+        - in: query
+          name: mood_id
+          required: true
+          type: integer
+          description: The ID of the mood to filter recommendations by
+      responses:
+        200:
+          description: A list of recommended books based on mood
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/UserRecommendation"
+        400:
+          description: Invalid mood ID
+        500:
+          description: Internal server error
+  /recommendations/clear:
+    delete:
+      tags:
+        - Recommendations
+      summary: Clear all user recommendations
+      responses:
+        204:
+          description: User recommendations cleared successfully
+        500:
+          description: Internal server error
+  /recommendations/<int:book_id>/delete:
+    delete:
+      tags:
+        - Recommendations
+      summary: Delete a specific book recommendation by book ID
+      parameters:
+        - in: path
+          name: book_id
+          required: true
+          type: integer
+          description: The ID of the book recommendation to delete
+      responses:
+        204:
+          description: Book recommendation deleted successfully
+        404:
+          description: Book recommendation not found
+        500:
+          description: Internal server error
+  # Quotes
+  /quotes/book/{book_id}:
+    get:
+      tags:
+        - Quotes
+      summary: Get all quotes for a specific book
+      parameters:
+        - in: path
+          name: book_id
+          required: true
+          type: integer
+          description: The ID of the book to retrieve quotes for
+      responses:
+        200:
+          description: A list of quotes for the book
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Quote"
+        404:
+          description: Book not found or no quotes available
+        500:
+          description: Internal server error
+  /quotes/user:
+    get:
+      tags:
+        - Quotes
+      summary: Get all user quotes
+      responses:
+        200:
+          description: A list of all user quotes
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Quote"
+        404:
+          description: No quotes found
+        500:
+          description: Internal server error
+  /quotes/book/{book_id}/new:
+    post:
+      tags:
+        - Quotes
+      summary: Create a new quote for a specific book
+      parameters:
+        - in: path
+          name: book_id
+          required: true
+          type: integer
+          description: The ID of the book to create a quote for
+        - in: body
+          name: quote
+          required: true
+          schema:
+            $ref: "#/definitions/Quote"
+      responses:
+        201:
+          description: Quote created successfully
+        400:
+          description: Invalid request
+        404:
+          description: Book not found
+        500:
+          description: Internal server error
+  /quotes/quote/{quote_id}:
+    get:
+      tags:
+        - Quotes
+      summary: Get a specific quote by ID
+      parameters:
+        - in: path
+          name: quote_id
+          required: true
+          type: integer
+          description: The ID of the quote to retrieve
+      responses:
+        200:
+          description: A quote object
+          schema:
+            $ref: "#/definitions/Quote"
+        404:
+          description: Quote not found
+        500:
+          description: Internal server error
+  /quotes/quote/{quote_id}/delete:
+    delete:
+      tags:
+        - Quotes
+      summary: Delete a specific quote by ID
+      parameters:
+        - in: path
+          name: quote_id
+          required: true
+          type: integer
+          description: The ID of the quote to delete
+      responses:
+        204:
+          description: Quote deleted successfully
+        404:
+          description: Quote not found
+        500:
+          description: Internal server error
+  # Tags
+  /tags:
+    get:
+      tags:
+        - Tags
+      summary: Get all tags
+      responses:
+        200:
+          description: A list of tags
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Tag"
+  /tags/delete/{tag_id}:
+    delete:
+      tags:
+        - Tags
+      summary: Delete a specific tag by ID
+      parameters:
+        - in: path
+          name: tag_id
+          required: true
+          type: integer
+          description: The ID of the tag to delete
+      responses:
+        204:
+          description: Tag deleted successfully
+        404:
+          description: Tag not found
+        500:
+          description: Internal server error
+  /tags/books/{tag_id}:
+    get:
+      tags:
+        - Tags
+      summary: Get all books associated with a specific tag
+      parameters:
+        - in: path
+          name: tag_id
+          required: true
+          type: integer
+          description: The ID of the tag to retrieve books for
+      responses:
+        200:
+          description: A list of books associated with the tag
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Book"
+        404:
+          description: Tag not found or no books available
+        500:
+          description: Internal server error
+  /tags/book_tag/{book_id}/{tag_id}:
+    post:
+      tags:
+        - Tags
+      summary: Associate a book with a tag
+      parameters:
+        - in: path
+          name: book_id
+          required: true
+          type: integer
+          description: The ID of the book to associate with the tag
+        - in: path
+          name: tag_id
+          required: true
+          type: integer
+          description: The ID of the tag to associate with the book
+      responses:
+        201:
+          description: Book associated with tag successfully
+        400:
+          description: Invalid input
+        404:
+          description: Book or tag not found
+        500:
+          description: Internal server error
+  # Bookmarks/user books
+  /bookmarks:
+    get:
+      tags:
+        - Bookmarks
+      summary: Get all user books
+      responses:
+        200:
+          description: A list of user books
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/UserBook"
+  /bookmarks/add/{book_id}:
+    post:
+      tags:
+        - Bookmarks
+      summary: Add a book to user bookmarks
+      parameters:
+        - in: path
+          name: book_id
+          required: true
+          type: integer
+          description: The ID of the book to add to bookmarks
+      responses:
+        201:
+          description: Book added to bookmarks successfully
+        400:
+          description: Invalid input
+        404:
+          description: Book not found
+        500:
+          description: Internal server error
+  /bookmarks/{bookmark_id}/remove:
+    delete:
+      tags:
+        - Bookmarks
+      summary: Remove a book from user bookmarks
+      parameters:
+        - in: path
+          name: bookmark_id
+          required: true
+          type: integer
+          description: The ID of the bookmark to remove
+      responses:
+        204:
+          description: Bookmark removed successfully
+        404:
+          description: Bookmark not found
+        500:
+          description: Internal server error
+  /bookmarks/clear:
+    delete:
+      tags:
+        - Bookmarks
+      summary: Clear all user bookmarks
+      responses:
+        204:
+          description: All user bookmarks cleared successfully
         500:
           description: Internal server error
 definitions:

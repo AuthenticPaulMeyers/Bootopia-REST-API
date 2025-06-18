@@ -47,11 +47,11 @@ def add_bookmarks(book_id):
         return None
 
 # Remove from bookmark
-@user_bookmarks.route('/<int:book_id>/remove', methods=['DELETE'])
+@user_bookmarks.route('/<int:bookmark_id>/remove', methods=['DELETE'])
 @jwt_required()
-def delete_bookmarks(book_id):
+def delete_bookmarks(bookmark_id):
     user_id = get_jwt_identity()
-    bookmark = UserBook.query.filter_by(user_id=user_id, book_id=book_id).first()
+    bookmark = UserBook.query.filter_by(user_id=user_id, id=bookmark_id).first()
 
     if not bookmark:
         return jsonify({'error': 'Bookmark not found.'}), HTTP_404_NOT_FOUND

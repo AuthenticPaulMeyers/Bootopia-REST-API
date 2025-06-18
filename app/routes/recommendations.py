@@ -1,31 +1,30 @@
 from flask import request, Blueprint, jsonify
 from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from ..services.get_recommendations import get_mood_recommendations
-from ..schema.models import db, UserRecommendation, Book
+from ..schema.models import db, UserRecommendation, Book, Mood
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import limiter, get_remote_address
-
 
 recommender = Blueprint('recommendations', __name__, url_prefix='/api/v1.0/recommendations')
 
 # Route to get mood-based book recommendations
-@recommender.route('/mood')
+@recommender.route('/<int:mood_id>', methods=['GET'])
 @jwt_required()
 @limiter.limit("10 per day", key_func=get_remote_address)
-def mood_based_recommendations():
+def mood_based_recommendations(mood_id):
     user_id = get_jwt_identity()
 
-    mood = request.args.get('mood')
-
-    # Validate the mood parameter
-    if not mood or not isinstance(mood, str):
-        return {"error": "Mood should be a non-empty string."}, HTTP_400_BAD_REQUEST
+    # Validate the mood_id parameter
+    if not mood_id or not isinstance(mood_id, int):
+        return {"error": "Mood ID should be a valid integer."}, HTTP_400_BAD_REQUEST
     # Check if mood is empty
-    if mood == "" or not mood:
+    if mood_id == "":
         return {"error": "Mood should not be empty."}, HTTP_400_BAD_REQUEST
     
-    mood = mood.lower().strip()
-
+    mood = Mood.query.filter_by(id=mood_id).first()
+    if not mood:
+        return {"error": "Mood not found."}, HTTP_400_BAD_REQUEST
+    # Get book recommendations based on the mood
     book_recommendations = get_mood_recommendations(mood)
     if not book_recommendations:
         return {"error": "No recommendations found for the given mood."}, HTTP_400_BAD_REQUEST  
@@ -101,7 +100,7 @@ def clear_recommendations():
     return jsonify({"message": "All recommendations cleared."}), HTTP_200_OK
 
 # Route to delete a specific recommendation by book ID
-@recommender.route('/<int:book_id>', methods=['DELETE'])
+@recommender.route('/<int:book_id>/delete', methods=['DELETE'])
 @jwt_required()
 def delete_recommendation(book_id):
     user_id = get_jwt_identity()

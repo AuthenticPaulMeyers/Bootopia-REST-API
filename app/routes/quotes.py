@@ -7,7 +7,7 @@ from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTT
 user_quotes = Blueprint('quotes', __name__, static_url_path='static/', url_prefix='/quotes')
 
 # get all user quotes
-@user_quotes.route('/')
+@user_quotes.route('/user', methods=['GET'])
 @jwt_required()
 def get_user_quotes():
 
@@ -80,7 +80,7 @@ def create_new_book_quote(book_id):
         }), HTTP_201_CREATED
     
 # read a specific quote
-@user_quotes.route('/<int:quote_id>', methods=['POST', 'GET'])
+@user_quotes.route('/quote/<int:quote_id>', methods=['POST', 'GET'])
 @jwt_required()
 def get_specific_quote(quote_id):
     quote = Quote.query.filter_by(id=quote_id).first()
@@ -100,7 +100,7 @@ def get_specific_quote(quote_id):
     ), HTTP_200_OK
 
 # delete a specific post
-@user_quotes.route('/delete/<int:quote_id>', methods=['DELETE'])
+@user_quotes.route('/quote/<int:quote_id>/delete', methods=['DELETE'])
 @jwt_required()
 def delete_quote(quote_id):
     userId = get_jwt_identity()

@@ -28,12 +28,12 @@ def get_notifications():
     return jsonify({'notifications': notifications_data, 'count': count}), HTTP_200_OK
 
 # read notification
-@notification_bp.route('/<int:note_id>/read')
+@notification_bp.route('/<int:notification_id>/read')
 @jwt_required()
-def read_notification(note_id):
+def read_notification(notification_id):
     user_id = get_jwt_identity()
 
-    notification = Notification.query.filter_by(user_id=user_id, id=note_id).first()
+    notification = Notification.query.filter_by(user_id=user_id, id=notification_id).first()
 
     if not notification:
         return jsonify({'error': 'Notification not found.'}), HTTP_404_NOT_FOUND
@@ -52,12 +52,12 @@ def read_notification(note_id):
     }), HTTP_200_OK
 
 # delete notification
-@notification_bp.route('/<int:note_id>/delete', methods=['DELETE'])
+@notification_bp.route('/<int:notification_id>/delete', methods=['DELETE'])
 @jwt_required()
-def delete_notification(note_id):
+def delete_notification(notification_id):
     user_id = get_jwt_identity()
 
-    notification = Notification.query.filter_by(user_id=user_id, id=note_id).first()
+    notification = Notification.query.filter_by(user_id=user_id, id=notification_id).first()
 
     if not notification:
         return jsonify({'error': 'Notification not found.'}), HTTP_404_NOT_FOUND

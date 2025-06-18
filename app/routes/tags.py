@@ -56,21 +56,15 @@ def delete_tag(tag_id):
     return None
 
 # attach tags to the book
-@tag_bp.route('/book_tag/<int:book_id>', methods=['POST'])
+@tag_bp.route('/book_tag/<int:book_id>/<int:tag_id>', methods=['POST'])
 @jwt_required()
-def add_tag_to_book(book_id):
-    # first get tag from the user and search the tag in the tags table if it exists then get the id else add it
-    tag = request.json.get('tag_name')
-    if not tag:
-        return jsonify({'error': 'Tag name is required.'}), HTTP_400_BAD_REQUEST
-    existing_tag = Tag.query.filter_by(name=tag).first()
-    if existing_tag:
-        tag_id = existing_tag.id
-    else:
-        new_tag = Tag(name=tag)
-        db.session.add(new_tag)
-        db.session.commit()
-        tag_id = new_tag.id
+def add_tag_to_book(book_id, tag_id):
+
+    if not tag_id:
+        return jsonify({'error': 'Tag ID is required.'}), HTTP_400_BAD_REQUEST
+    existing_tag = Tag.query.filter_by(id=tag_id).first()
+    if not existing_tag:
+        return jsonify({'error': 'Tag not found.'}), HTTP_404_NOT_FOUND
     # now check if the book_tag already exists
     book_tag = BookTag.query.filter_by(book_id=book_id, tag_id=tag_id).first()
     if book_tag:

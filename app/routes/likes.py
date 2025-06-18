@@ -7,7 +7,7 @@ from ..constants.http_status_codes import HTTP_200_OK, HTTP_404_NOT_FOUND
 user_likes = Blueprint('likes', __name__, url_prefix='/api/v1.0/likes')
 
 # Like and unlike a post
-@user_likes.route('/<int:post_id>/like', methods=['POST', 'GET'])
+@user_likes.route('/<int:post_id>', methods=['POST', 'GET'])
 @jwt_required()
 def like_post(post_id):
     userId = get_jwt_identity()

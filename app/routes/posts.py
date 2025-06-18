@@ -130,7 +130,7 @@ def create_post():
         }), HTTP_201_CREATED
     
 # get a specific post
-@user_posts.route('/<int:post_id>')
+@user_posts.route('/get/<int:post_id>')
 @jwt_required()
 def get_post(post_id):
     post = Post.query.filter_by(id=post_id).first()
@@ -169,7 +169,7 @@ def get_post(post_id):
     ), HTTP_200_OK
 
 # update a specific post
-@user_posts.route('/edit/<int:post_id>', methods=['PUT', 'GET'])
+@user_posts.route('/update/<int:post_id>', methods=['PUT', 'GET'])
 @jwt_required()
 def update_post(post_id):
     userId=get_jwt_identity()
