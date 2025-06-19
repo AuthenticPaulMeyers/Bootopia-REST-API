@@ -1,4 +1,4 @@
-# Bootopia API
+# Bootopia REST API
 
 > ### Bootopia is a social network for book lovers.
 
@@ -84,16 +84,16 @@ Private or public reading diary:
 
 ## Tools used to build the API
 1. Framework
--The API is a RESTful API built in Python using the (Flask)[https://flask.palletsprojects.com/] framework. Flask is python's micro-framework for backend development. I think Flask is the best beginner friendly framework i would recommend every beginner python developer to use as they are getting started into backend development.
+-The API is a RESTful API built in Python using the [Flask](https://flask.palletsprojects.com/) framework. Flask is python's micro-framework for backend development. I think Flask is the best beginner friendly framework i would recommend every beginner python developer to use as they are getting started into backend development.
 
 2. Database
-- The API uses (PostgreSQL)[https://www.postgresql.org/] to store the data. PostgreSQL is a relational database which stores data in tables arranged in rows and columns. It is one of the best relational databases out there used by many companies. I have used (SQLAlchemy)[https://www.sqlalchemy.org/], an Object Relational Mapper to interact with the database in python files.
+- The API uses [PostgreSQL](https://www.postgresql.org/) to store the data. PostgreSQL is a relational database which stores data in tables arranged in rows and columns. It is one of the best relational databases out there used by many companies. I have used [SQLAlchemy](https://www.sqlalchemy.org/), an Object Relational Mapper to interact with the database in python files.
 
 3. AI Integration
-- I have used the (OpenAI)[www.openai.com] models with `gpt-4` to generate book summaries and mood-based recommendations.
+- I have used the [OpenAI](www.openai.com) models with `gpt-4` to generate book summaries and mood-based recommendations.
 
 4. Documentation
-- The documentation is running on (SwaggerUI)[https://swagger.io/tools/swagger-ui/] which i found is easy to integrate in flask using the `flask-swagger-ui` library.
+- The documentation is running on [SwaggerUI](https://swagger.io/tools/swagger-ui/) which i found is easy to integrate in flask using the `flask-swagger-ui` library.
 
 ## Security
 - When it comes to API development, security is the crucial part in this case. 
