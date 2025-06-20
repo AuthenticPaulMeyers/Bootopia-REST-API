@@ -84,7 +84,7 @@ Private or public reading diary:
 
 ## Tools used to build the API
 1. Framework
--The API is a RESTful API built in Python using the [Flask](https://flask.palletsprojects.com/) framework. Flask is python's micro-framework for backend development. I think Flask is the best beginner friendly framework i would recommend every beginner python developer to use as they are getting started into backend development.
+-The API is a RESTful API built in Python using the [Flask](https://flask.palletsprojects.com/) framework. Flask is python's micro-framework for backend development. I think Flask is the best beginner friendly framework i would recommend every beginner python developer to use as they are getting started into backend development. I love it.
 
 2. Database
 - The API uses [PostgreSQL](https://www.postgresql.org/) to store the data. PostgreSQL is a relational database which stores data in tables arranged in rows and columns. It is one of the best relational databases out there used by many companies. I have used [SQLAlchemy](https://www.sqlalchemy.org/), an Object Relational Mapper to interact with the database in python files.
