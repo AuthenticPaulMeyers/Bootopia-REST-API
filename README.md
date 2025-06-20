@@ -122,7 +122,7 @@ Private or public reading diary:
 2. Install the dependencies
 - There is a `requirements.txt` file in the project directory which contains all the dependencies used in this project.
 - Open the terminal and navigate to the project directory. Then run `python -m venv venv` to create a virtual environment.
-- Go inside the `venv` the install all the dependencies at once using `pip freeze > requirements.txt`.
+- Go inside the `venv` then install all the dependencies at once using `pip install -r requirements.txt`.
 - Run the program using `python run.py` or `flask run --debug`.
 
 - To access the documentation for the routes make sure your local server is running, then go to the local server address where the app is being served, for example: `127.0.0.1:5000/docs` or `localhost:5000/docs`
