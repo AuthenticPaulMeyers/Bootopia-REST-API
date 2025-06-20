@@ -23,7 +23,7 @@ Users can:
 
 ### 2. AI Summarizer Assistant
 Key Features:
-- Summarize entire books or chapters.
+- Summarize entire book.
 - Extract key quotes, themes, and takeaways.
 
 ### 3. Smart Book Discovery Engine
