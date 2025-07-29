@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from ..schema.models import db, Book, BookTag, Tag
+from ..schema.models import db, Book
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..constants.http_status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_201_CREATED
 from ..utils.file_upload import upload_file
@@ -43,7 +43,7 @@ def get_all_books():
             'prev_page': books.prev_num
         }
         return jsonify({'data': data, 'metadata': metadata}), HTTP_200_OK
-    return {'message': 'No books currently available!'}
+    return jsonify({'message': 'No books currently available!'}), HTTP_200_OK
 
 # Add new book route
 @books.route("/new", methods=['POST', 'GET'])
@@ -96,9 +96,9 @@ def add_new_book():
 @books.route("/get/<int:book_id>")
 @jwt_required()
 def get_book(book_id):
-    # get user id
+    
     userId = get_jwt_identity()
-
+    # fetch the book using the user id
     book = Book.query.filter_by(user_id=userId, id=book_id).first()
 
     if book:
@@ -120,7 +120,7 @@ def get_book(book_id):
 @books.route("/search", methods=['POST'])
 @jwt_required()
 def search_books():
-    # implement a book search where users can search books based on the title or genre
+    # a book search where users can search books based on the title or genre
     title = request.args.get('title')
     author = request.args.get('author')
 

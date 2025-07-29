@@ -1,12 +1,10 @@
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
-from flask import app, current_app
+from flask import current_app
 from time import time
 import jwt
 # initialise the database
 db = SQLAlchemy()
-
-# This file has 12 models
 
 # Users table
 class Users(db.Model):
