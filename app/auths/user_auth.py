@@ -138,10 +138,10 @@ def reset_password_request():
     user_email = request.json.get("email")
     # validate the user email
     if not validators.email(user_email):
-        return {"error": "Email is not valid."}, HTTP_400_BAD_REQUEST
+        return jsonify({"error": "Email is not valid."}), HTTP_400_BAD_REQUEST
     
     if not user_email:
-        return {"error": "Email is required."}, HTTP_400_BAD_REQUEST
+        return jsonify({"error": "Email is required."}), HTTP_400_BAD_REQUEST
     
     if request.method == 'POST':
         user = Users.query.filter_by(email=user_email).first()
@@ -149,9 +149,9 @@ def reset_password_request():
         if user:
         # send reset email
             send_password_reset_email(user)
-            return {"message": "An email has been sent with instructions to reset your password."}, HTTP_200_OK
+            return jsonify({"message": "An email has been sent with instructions to reset your password."}), HTTP_200_OK
         else:
-            return {"error": "Failed to send reset email. Please try again later."}, HTTP_500_INTERNAL_SERVER_ERROR
+            return jsonify({"error": "Failed to send reset email. Please try again later."}), HTTP_500_INTERNAL_SERVER_ERROR
 
 # reset user password route
 @auth.route('/reset-password/<token>', methods=['POST'])
@@ -160,25 +160,25 @@ def reset_password(token):
     
     user = Users.verify_reset_password_token(token)
     if not user:
-        return {"error": "Invalid or expired token."}, HTTP_400_BAD_REQUEST
+        return jsonify({"error": "Invalid or expired token."}), HTTP_400_BAD_REQUEST
     
     if request.method =="POST":
         new_password = request.json.get("password")
         confirm_password = request.json.get("confirm-password")
         # validate the new password and confirm password
         if not new_password or not confirm_password or new_password == '' or confirm_password == '':
-            return {"error": "New password is required."}, HTTP_400_BAD_REQUEST
+            return jsonify({"error": "New password is required."}), HTTP_400_BAD_REQUEST
         
         if new_password != confirm_password:
-            return {"error": "Passwords do not match."}, HTTP_400_BAD_REQUEST
+            return jsonify({"error": "Passwords do not match."}), HTTP_400_BAD_REQUEST
         if len(new_password) < 8:
-            return {"error": "Password must be at least 8 characters long."}, HTTP_400_BAD_REQUEST
+            return jsonify({"error": "Password must be at least 8 characters long."}), HTTP_400_BAD_REQUEST
         # update the user password
         hashed_password = generate_password_hash(new_password)
         user.password_hash = hashed_password
         db.session.commit()
 
-        return {"message": "Your password has been updated successfully."}, HTTP_200_OK
+        return jsonify({"message": "Your password has been updated successfully."}), HTTP_200_OK
 
 # create user refresh token
 @auth.get("/token/refresh")
