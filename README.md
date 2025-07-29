@@ -23,7 +23,7 @@ Users can:
 
 ### 2. AI Summarizer Assistant
 Key Features:
-- Summarize entire books or chapters.
+- Summarize entire book.
 - Extract key quotes, themes, and takeaways.
 
 ### 3. Smart Book Discovery Engine
@@ -84,7 +84,7 @@ Private or public reading diary:
 
 ## Tools used to build the API
 1. Framework
--The API is a RESTful API built in Python using the [Flask](https://flask.palletsprojects.com/) framework. Flask is python's micro-framework for backend development. I think Flask is the best beginner friendly framework i would recommend every beginner python developer to use as they are getting started into backend development.
+-The API is a RESTful API built in Python using the [Flask](https://flask.palletsprojects.com/) framework. Flask is python's micro-framework for backend development. I think Flask is the best beginner friendly framework i would recommend every beginner python developer to use as they are getting started into backend development. I love it.
 
 2. Database
 - The API uses [PostgreSQL](https://www.postgresql.org/) to store the data. PostgreSQL is a relational database which stores data in tables arranged in rows and columns. It is one of the best relational databases out there used by many companies. I have used [SQLAlchemy](https://www.sqlalchemy.org/), an Object Relational Mapper to interact with the database in python files.
@@ -122,7 +122,7 @@ Private or public reading diary:
 2. Install the dependencies
 - There is a `requirements.txt` file in the project directory which contains all the dependencies used in this project.
 - Open the terminal and navigate to the project directory. Then run `python -m venv venv` to create a virtual environment.
-- Go inside the `venv` the install all the dependencies at once using `pip freeze > requirements.txt`.
+- Go inside the `venv` then install all the dependencies at once using `pip install -r requirements.txt`.
 - Run the program using `python run.py` or `flask run --debug`.
 
 - To access the documentation for the routes make sure your local server is running, then go to the local server address where the app is being served, for example: `127.0.0.1:5000/docs` or `localhost:5000/docs`
