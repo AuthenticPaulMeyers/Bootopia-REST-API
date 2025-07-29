@@ -63,6 +63,7 @@ def get_comment_post(post_id):
 @jwt_required()
 def delete_comment(comment_id):
     userId = get_jwt_identity()
+    
     comment = Comment.query.filter_by(id=comment_id, user_id=userId).first()
 
     if not comment:

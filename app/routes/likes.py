@@ -11,6 +11,7 @@ user_likes = Blueprint('likes', __name__, url_prefix='/api/v1.0/likes')
 @jwt_required()
 def like_post(post_id):
     userId = get_jwt_identity()
+    
     current_user = Users.query.get(userId)
     # get post with that id
     post = Post.query.get(post_id)
