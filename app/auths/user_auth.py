@@ -14,8 +14,9 @@ auth = Blueprint('auth', __name__, static_url_path='static/', url_prefix='/api/v
 # register route
 @auth.route('/register', methods=['POST', 'GET'])
 def register():
-    # get user details and create variables
+
     if request.method == 'POST':
+        # get user details and create variables
         username = request.form.get('username')
         email = request.form.get('email')
         bio = request.form.get('bio')
