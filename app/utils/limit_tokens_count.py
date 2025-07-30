@@ -7,7 +7,6 @@ def truncate_text_to_token_limit(text, max_tokens=6000):
     
     tokens = encoding.encode(text)
     if len(tokens) > max_tokens:
-        print(f"Truncating from {len(tokens)} to {max_tokens} tokens.")
         tokens = tokens[:max_tokens]
 
     return encoding.decode(tokens)

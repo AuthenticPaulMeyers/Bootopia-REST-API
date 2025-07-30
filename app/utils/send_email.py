@@ -16,4 +16,5 @@ def send_password_reset_email(user):
     send_email('Password reset request',
     sender=app.config['MAIL_USERNAME'],
     recipients=[user.email],
+    # the body should be replaced with html code for proper email formatting
     text_body=f"Hello { user.username }, To reset your password please click on the following link: {link}. If you have not requested a password reset simply ignore this message. Sincerely, The Bootopia Support Team")

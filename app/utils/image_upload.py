@@ -3,7 +3,6 @@ from werkzeug.utils import secure_filename
 from flask import url_for
 import uuid
 
-
 UPLOAD_FOLDER = 'static/uploads/images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 

@@ -11,7 +11,7 @@ from .constants.http_status_codes import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_S
 from flask_mail import Mail
 from flask_swagger_ui import get_swaggerui_blueprint
 
-load_dotenv()
+load_dotenv(override=True)
 
 # swagger ui setup
 SWAGGER_URL = '/docs'
@@ -106,7 +106,6 @@ def create_app(test_config=None):
     @app.route('/static/swagger.yaml')
     def send_swagger():
         return send_from_directory('static', 'swagger.yaml')
-
 
     # exception handling
     @app.errorhandler(HTTP_404_NOT_FOUND)
