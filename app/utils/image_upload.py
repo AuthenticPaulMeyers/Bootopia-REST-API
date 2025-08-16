@@ -1,3 +1,4 @@
+# Todo: Migrate the image upload to Supabase backend and save the image url into the database other than saving files in the project folder
 import os
 from werkzeug.utils import secure_filename
 from flask import url_for

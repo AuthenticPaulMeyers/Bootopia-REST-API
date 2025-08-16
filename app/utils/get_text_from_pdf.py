@@ -8,3 +8,4 @@ def extract_text_content(pdf_path):
     return text
 
 
+# Todo: extract text from scanned documents

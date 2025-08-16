@@ -3,7 +3,7 @@ import json
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
+load_dotenv(override=True)
 
 client = OpenAI(
         base_url="https://models.inference.ai.azure.com",

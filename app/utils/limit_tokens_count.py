@@ -1,5 +1,4 @@
 import tiktoken
-from ..services.get_summary import MODEL
 
 def truncate_text_to_token_limit(text, max_tokens=6000):
     # Use the GPT-compatible tokenizer

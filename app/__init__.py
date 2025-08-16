@@ -24,6 +24,8 @@ swaggerui_blueprint = get_swaggerui_blueprint(
 )
 
 mail = Mail()
+migrate = Migrate()
+manager = JWTManager()
 
 limiter = Limiter(
     get_remote_address,
@@ -38,6 +40,7 @@ def create_app(test_config=None):
     if test_config is None:
         app.config.from_mapping(
             SECRET_KEY=os.environ.get("SECRET_KEY"),
+            # Todo: Create a supabase database use the URL
             SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URI'),
             JWT_SECRET_KEY=os.getenv('JWT_SECRET_KEY'),
             SQLALCHEMY_TRACK_MODIFICATIONS=False
@@ -51,9 +54,9 @@ def create_app(test_config=None):
     # initialise the limiter here
     limiter.init_app(app)
     # initialise jwt here
-    JWTManager(app)
+    manager.init_app(app)
     # initialise migrations
-    Migrate(app, db)
+    migrate.init_app(app, db)
 
     # CORS configuration
     CORS(app)
